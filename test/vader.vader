@@ -1,0 +1,17 @@
+
+# Vader file
+
+Include: include/setup.vader
+
+~ Features
+Include (Inspection API):     feature/inspection-api.vader
+Include (Manipulation API):   feature/manipulation-api.vader
+Include (GTD):                feature/gtd.vader
+Include (Time):               feature/time.vader
+Include (Pomodoro):           feature/pomodoro.vader
+Include (Utils):              feature/utils.vader
+
+* Regressions
+" Include (#ISSUE Some Description):      regression/issue-##.vader
+
+Include: include/teardown.vader

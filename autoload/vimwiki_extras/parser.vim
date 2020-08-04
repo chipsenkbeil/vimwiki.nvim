@@ -30,6 +30,58 @@ function! vim_extras#parser#lit(c) abort
     return funcref('l:parser')
 endfunction
 
+function! vim_extras#parser#zeroOrOne(parser) abort
+    return vim_extras#parser#repeatNM(a:parser, 0, 1)
+endfunction
+
+function! vim_extras#parser#repeatNM(parser, n, m) abort
+    function! l:parser(input) closure abort
+        if a:n > a:m
+            return s:failure
+        endif
+
+        let l:i = 0
+        let l:pos = a:input.get_pos()
+        let l:results = []
+        while l:i <= a:m
+            let l:result = a:parser(a:input)
+            if s:is_failure(l:result)
+                break
+            else
+                let l:results += [l:result]
+            endif
+
+            let l:i += 1
+        endwhile
+
+        if l:i >= a:n && l:i <= a:m
+            return l:results
+        else
+            call a:input.set_pos(l:pos)
+            return s:failure
+        endif
+    endfunction
+
+    return funcref('l:parser')
+endfunction
+
+function! vim_extras#parser#not(parser) abort
+    function! l:parser(input) closure abort
+        let l:pos = a:input.get_pos()
+        let l:result = a:parser(a:input)
+        if !s:is_failure(l:result)
+            call a:input.set_pos(l:pos)
+            return s:failure
+        endif
+
+        let l:r = a:input.read_next()
+        call a:input.advance_next()
+        return l:r
+    endfunction
+
+    return funcref('l:parser')
+endfunction
+
 function! vim_extras#parser#or(...) abort
     function! l:parser(input) closure abort
         for l:p in a:000
@@ -54,6 +106,8 @@ function! vim_extras#parser#and(...) abort
             if s:is_failure(l:result)
                 call a:input.set_pos(l:pos)
                 return s:failure
+            else
+                let l:results += [l:result]
             endif
         endfor
 

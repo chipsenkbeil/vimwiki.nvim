@@ -36,7 +36,7 @@ let g:vimwiki_extras_clients = {}
 "   vimwiki language object if successful
 "
 function! vimwiki_extras#inspect_under_cursor() abort
-
+    echom 'Hello!'
 endfunction
 
 " Manipulates vimwiki syntax under the cursor using the given instructions,

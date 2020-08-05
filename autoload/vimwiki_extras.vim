@@ -57,12 +57,7 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " INTERNAL API
 
-" [Internal] General logging callback when a client exits
-function! s:ExitCallback(client, exit_code) abort
-    if a:exit_code > 0
-        echoerr 'Client '.a:client.job_id().' exited with code '.a:exit_code
-    endif
-endfunction
+" N/A
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

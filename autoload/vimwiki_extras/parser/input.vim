@@ -37,7 +37,7 @@ function! s:self.read_next() dict abort
 endfunction
 
 function! s:self.read_n(n) dict abort
-    return self._text[:a:n-1]
+    return self._text[self._pos : self._pos+a:n-1]
 endfunction
 
 function! s:self.advance_next() dict abort

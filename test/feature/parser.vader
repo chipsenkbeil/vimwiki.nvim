@@ -1,2 +1,29 @@
-Execute(Parser Test Suite):
-  Log 'TODO: Implement'
+Execute(Lit Parser should fail if input not a match):
+  let input = vimwiki_extras#parser#input#new('abcd')
+  let Parser = vimwiki_extras#parser#lit('b')
+  let result = Parser(input)
+  Assert vimwiki_extras#parser#is_failure(result), 'Unexpected success: '.result
+
+Execute(Lit Parser should return match if succeeds):
+  let input = vimwiki_extras#parser#input#new('abcd')
+  let Parser = vimwiki_extras#parser#lit('a')
+  let result = Parser(input)
+  AssertEqual 'a', result, 'Unexpectedly returned: '.result
+
+Execute(ZeroOrOne Parser should fail if more than one match):
+  let input = vimwiki_extras#parser#input#new('aaa')
+  let Parser = vimwiki_extras#parser#zeroOrOne(vimwiki_extras#parser#lit('a'))
+  let result = Parser(input)
+  Assert vimwiki_extras#parser#is_failure(result), 'Unexpected success: '.result
+
+Execute(ZeroOrOne Parser should succeed and return empty if zero matches):
+  let input = vimwiki_extras#parser#input#new('bcd')
+  let Parser = vimwiki_extras#parser#zeroOrOne(vimwiki_extras#parser#lit('a'))
+  let result = Parser(input)
+  AssertEqual [], result, 'Unexpectedly returned: '.result
+
+Execute(ZeroOrOne Parser should succeed and return parser result if one match):
+  let input = vimwiki_extras#parser#input#new('a')
+  let Parser = vimwiki_extras#parser#zeroOrOne(vimwiki_extras#parser#lit('a'))
+  let result = Parser(input)
+  AssertEqual ['a'], result, 'Unexpectedly returned: '.result

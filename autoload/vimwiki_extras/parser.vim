@@ -16,8 +16,8 @@ set cpoptions&vim
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " TOP-LEVEL API
 
-function! vim_extras#parser#lit(c) abort
-    function! l:parser(input) closure abort
+function! vimwiki_extras#parser#lit(c) abort
+    function! s:LitParser(input) closure abort
         let l:r = a:input.read_next()
         if l:r ==# a:c
             call a:input.advance_next()
@@ -27,15 +27,15 @@ function! vim_extras#parser#lit(c) abort
         endif
     endfunction
 
-    return funcref('l:parser')
+    return funcref('s:LitParser')
 endfunction
 
-function! vim_extras#parser#zeroOrOne(parser) abort
-    return vim_extras#parser#repeatNM(a:parser, 0, 1)
+function! vimwiki_extras#parser#zeroOrOne(parser) abort
+    return vimwiki_extras#parser#repeatNM(a:parser, 0, 1)
 endfunction
 
-function! vim_extras#parser#repeatNM(parser, n, m) abort
-    function! l:parser(input) closure abort
+function! vimwiki_extras#parser#repeatNM(parser, n, m) abort
+    function! s:RepeatNMParser(input) closure abort
         if a:n > a:m
             return s:failure
         endif
@@ -62,11 +62,11 @@ function! vim_extras#parser#repeatNM(parser, n, m) abort
         endif
     endfunction
 
-    return funcref('l:parser')
+    return funcref('s:RepeatNMParser')
 endfunction
 
-function! vim_extras#parser#not(parser) abort
-    function! l:parser(input) closure abort
+function! vimwiki_extras#parser#not(parser) abort
+    function! s:NotParser(input) closure abort
         let l:pos = a:input.get_pos()
         let l:result = a:parser(a:input)
         if !s:is_failure(l:result)
@@ -79,11 +79,11 @@ function! vim_extras#parser#not(parser) abort
         return l:r
     endfunction
 
-    return funcref('l:parser')
+    return funcref('s:NotParser')
 endfunction
 
-function! vim_extras#parser#or(...) abort
-    function! l:parser(input) closure abort
+function! vimwiki_extras#parser#or(...) abort
+    function! s:OrParser(input) closure abort
         for l:p in a:000
             let l:result = l:p(a:input)
             if !s:is_failure(l:result)
@@ -94,11 +94,11 @@ function! vim_extras#parser#or(...) abort
         return s:failure
     endfunction
 
-    return funcref('l:parser')
+    return funcref('s:OrParser')
 endfunction
 
-function! vim_extras#parser#and(...) abort
-    function! l:parser(input) closure abort
+function! vimwiki_extras#parser#and(...) abort
+    function! s:AndParser(input) closure abort
         let l:pos = a:input.get_pos()
         let l:results = []
         for l:p in a:000
@@ -114,11 +114,11 @@ function! vim_extras#parser#and(...) abort
         return l:results
     endfunction
 
-    return funcref('l:parser')
+    return funcref('s:AndParser')
 endfunction
 
-function! vim_extras#parser#apply(f, parser) abort
-    function! l:parser(input) closure abort
+function! vimwiki_extras#parser#apply(f, parser) abort
+    function! s:ApplyParser(input) closure abort
         let l:result = a:parser(a:input)
         if s:is_failure(l:result)
             return s:failure
@@ -127,7 +127,7 @@ function! vim_extras#parser#apply(f, parser) abort
         endif
     endfunction
 
-    return funcref('l:parser')
+    return funcref('s:ApplyParser')
 endfunction
 
 function! vimwiki_extras#parser#is_failure(result) abort
@@ -137,7 +137,11 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " INTERNAL API
 
-let s:failure = '<__FAILURE__>'
+function s:SID()
+    return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
+endfun
+
+let s:failure = s:SID().'<FAILURE>'
 
 function! s:is_failure(result) abort
     return a:result ==# s:failure

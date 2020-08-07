@@ -42,7 +42,7 @@ let s:self = {}
 " PUBLIC METHODS
 
 function! s:self.parse(text) dict abort
-    let l:input = vimwiki_extras#parser#input#new(a:text)
+    let l:input = vimwiki_extras#lang#utils#input#new(a:text)
 
     let l:Parser = s:header()
 
@@ -53,7 +53,7 @@ endfunction
 " INTERNAL METHODS
 
 function! s:header() abort
-    let l:b = vimwiki_extras#parser#new_builder()
+    let l:b = vimwiki_extras#lang#utils#builder#new()
 
     return b.apply(
     \ b.predicate(

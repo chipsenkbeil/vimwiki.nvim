@@ -10,7 +10,6 @@ Include (GTD):                feature/gtd.vader
 Include (Time):               feature/time.vader
 Include (Pomodoro):           feature/pomodoro.vader
 Include (Lang):               feature/lang.vader
-Include (Parser):             feature/parser.vader
 Include (Utils):              feature/utils.vader
 
 * Regressions

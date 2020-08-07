@@ -1,4 +1,4 @@
-" VIMWIKI EXTRAS - PARSER :: INPUT
+" VIMWIKI EXTRAS - LANG :: UTILS :: INPUT
 "
 " About: Represents the input used with a parser.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -10,12 +10,12 @@ set cpoptions&vim
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " GLOBAL CONFIG
 
-" g:vimwiki_extras_parser_input_...
+" g:vimwiki_extras_lang_utils_input_...
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " CONSTRUCTOR
 
-function! vimwiki_extras#parser#input#new(text) abort
+function! vimwiki_extras#lang#utils#input#new(text) abort
     let l:self = copy(s:self)
     let l:self._text = a:text
     let l:self._len = len(a:text)

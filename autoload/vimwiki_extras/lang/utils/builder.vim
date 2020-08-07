@@ -1,4 +1,4 @@
-" VIMWIKI EXTRAS - PARSER
+" VIMWIKI EXTRAS - LANG :: UTILS :: BUILDER
 "
 " About: Represents the top-level API our parser combinator library for use
 "        in describing and parsing languages using native vimL.
@@ -11,12 +11,12 @@ set cpoptions&vim
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " GLOBAL CONFIG
 
-" g:vimwiki_extras_parser_...
+" g:vimwiki_extras_lang_utils_builder_...
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " TOP-LEVEL API
 
-function! vimwiki_extras#parser#new_builder() abort
+function! vimwiki_extras#lang#utils#builder#new() abort
     return copy(s:self)
 endfunction
 
@@ -265,7 +265,7 @@ function! s:self.side_effect(parser, f) dict abort
     return funcref('s:Parser')
 endfunction
 
-function! vimwiki_extras#parser#is_failure(result) abort
+function! vimwiki_extras#lang#utils#builder#is_failure(result) abort
     return s:is_failure(a:result)
 endfunction
 

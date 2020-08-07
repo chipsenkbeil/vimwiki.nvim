@@ -70,6 +70,10 @@ function! s:self.has_more() dict abort
     return self.get_len() > 0
 endfunction
 
+function! s:self.to_str() dict abort
+    return self._pos.'/'.self._len.': '.self._text
+endfunction
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " INTERNAL API
 

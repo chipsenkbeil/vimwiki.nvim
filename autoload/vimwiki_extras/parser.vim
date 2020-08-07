@@ -16,12 +16,13 @@ set cpoptions&vim
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " TOP-LEVEL API
 
-function! vimwiki_extras#parser#lit(c) abort
+function! vimwiki_extras#parser#lit(text) abort
+    let l:text_len = len(a:text)
     function! s:LitParser(input) closure abort
-        let l:r = a:input.read_next()
-        if l:r ==# a:c
-            call a:input.advance_next()
-            return a:c
+        let l:r = a:input.read_n(l:text_len)
+        if l:r ==# a:text
+            call a:input.advance_n(l:text_len)
+            return a:text
         else
             return s:failure
         endif
@@ -83,9 +84,10 @@ function! vimwiki_extras#parser#not(parser) abort
 endfunction
 
 function! vimwiki_extras#parser#or(...) abort
+    let l:parsers = a:000
     function! s:OrParser(input) closure abort
-        for l:p in a:000
-            let l:result = l:p(a:input)
+        for l:Parser in l:parsers
+            let l:result = l:Parser(a:input)
             if !s:is_failure(l:result)
                 return l:result
             endif
@@ -98,11 +100,12 @@ function! vimwiki_extras#parser#or(...) abort
 endfunction
 
 function! vimwiki_extras#parser#and(...) abort
+    let l:parsers = a:000
     function! s:AndParser(input) closure abort
         let l:pos = a:input.get_pos()
         let l:results = []
-        for l:p in a:000
-            let l:result = l:p(a:input)
+        for l:Parser in l:parsers
+            let l:result = l:Parser(a:input)
             if s:is_failure(l:result)
                 call a:input.set_pos(l:pos)
                 return s:failure
@@ -119,11 +122,18 @@ endfunction
 
 function! vimwiki_extras#parser#apply(f, parser) abort
     function! s:ApplyParser(input) closure abort
+        let l:pos = a:input.get_pos()
         let l:result = a:parser(a:input)
         if s:is_failure(l:result)
             return s:failure
         else
-            return a:f(l:result)
+            try
+                let l:f_result = a:f(l:result)
+                return l:f_result
+            catch
+                call a:input.set_pos(l:pos)
+                return s:failure
+            endtry
         endif
     endfunction
 

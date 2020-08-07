@@ -1,3 +1,19 @@
+Execute(AnyChar Parser should fail if no input left):
+  let input = vimwiki_extras#parser#input#new('a')
+  let Parser = vimwiki_extras#parser#any_char()
+
+  call input.advance_next()
+  let result = Parser(input)
+  Assert vimwiki_extras#parser#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  AssertEqual 1, input.get_pos(), 'Input advanced unexpectedly'
+
+Execute(AnyChar Parser should next character if available):
+  let input = vimwiki_extras#parser#input#new('a')
+  let Parser = vimwiki_extras#parser#any_char()
+  let result = Parser(input)
+  AssertEqual 'a', result, 'Unexpectedly returned: '.printf('%s', result)
+  AssertEqual 1, input.get_pos(), 'Input did not advanced'
+
 Execute(Lit Parser should fail if input not a match):
   let input = vimwiki_extras#parser#input#new('abcd')
   let Parser = vimwiki_extras#parser#lit('b')
@@ -25,6 +41,60 @@ Execute(Lit Parser should support text with length greater than 1):
   let result = Parser(input)
   AssertEqual 'aa', result, 'Unexpectedly returned: '.printf('%s', result)
   AssertEqual 2, input.get_pos(), 'Input advanced to wrong position: '.input.get_pos()
+
+Execute(OneOrMore Parser should fail if zero matches):
+  let input = vimwiki_extras#parser#input#new('aaa')
+  let Parser = vimwiki_extras#parser#oneOrMore(
+  \ vimwiki_extras#parser#lit('b'),
+  \ )
+  let result = Parser(input)
+  Assert vimwiki_extras#parser#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
+
+Execute(OneOrMore Parser should run until a failure is reached, returning results):
+  let input = vimwiki_extras#parser#input#new('aab')
+  let Parser = vimwiki_extras#parser#oneOrMore(
+  \ vimwiki_extras#parser#lit('a'),
+  \ )
+  let result = Parser(input)
+  AssertEqual ['a', 'a'], result, 'Unexpected result: '.printf('%s', result)
+  AssertEqual 2, input.get_pos(), 'Input advanced to wrong position: '.input.get_pos()
+
+Execute(OneOrMore Parser should stop and return results if reaching end of input):
+  let input = vimwiki_extras#parser#input#new('aaa')
+  let Parser = vimwiki_extras#parser#oneOrMore(
+  \ vimwiki_extras#parser#lit('a'),
+  \ )
+  let result = Parser(input)
+  AssertEqual ['a', 'a', 'a'], result, 'Unexpected result: '.printf('%s', result)
+  AssertEqual 3, input.get_pos(), 'Input advanced to wrong position: '.input.get_pos()
+
+Execute(Repeat Parser should return empty list if zero results):
+  let input = vimwiki_extras#parser#input#new('aaa')
+  let Parser = vimwiki_extras#parser#repeat(
+  \ vimwiki_extras#parser#lit('b'),
+  \ )
+  let result = Parser(input)
+  AssertEqual [], result, 'Unexpected result: '.printf('%s', result)
+  AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
+
+Execute(Repeat Parser should run until a failure is reached, returning results):
+  let input = vimwiki_extras#parser#input#new('aab')
+  let Parser = vimwiki_extras#parser#repeat(
+  \ vimwiki_extras#parser#lit('a'),
+  \ )
+  let result = Parser(input)
+  AssertEqual ['a', 'a'], result, 'Unexpected result: '.printf('%s', result)
+  AssertEqual 2, input.get_pos(), 'Input advanced to wrong position: '.input.get_pos()
+
+Execute(Repeat Parser should stop and return results if reaching end of input):
+  let input = vimwiki_extras#parser#input#new('aaa')
+  let Parser = vimwiki_extras#parser#repeat(
+  \ vimwiki_extras#parser#lit('a'),
+  \ )
+  let result = Parser(input)
+  AssertEqual ['a', 'a', 'a'], result, 'Unexpected result: '.printf('%s', result)
+  AssertEqual 3, input.get_pos(), 'Input advanced to wrong position: '.input.get_pos()
 
 Execute(ZeroOrOne Parser should fail if more than one match):
   let input = vimwiki_extras#parser#input#new('aaa')
@@ -180,8 +250,8 @@ Execute(And Parser should succeed if all parsers succeeds, returning their resul
 Execute(Apply Parser should fail if the subparser fails):
   let input = vimwiki_extras#parser#input#new('a')
   let Parser = vimwiki_extras#parser#apply(
-  \ {c -> str2nr(c)},
   \ vimwiki_extras#parser#lit('1'),
+  \ {c -> str2nr(c)},
   \ )
   let result = Parser(input)
   Assert vimwiki_extras#parser#is_failure(result), 'Unexpected success: '.printf('%s', result)
@@ -194,8 +264,8 @@ Execute(Apply Parser should fail if parser succeeds and apply func fails):
   endfunction
 
   let Parser = vimwiki_extras#parser#apply(
-  \ funcref('s:ApplyErrorF'),
   \ vimwiki_extras#parser#lit('abc'),
+  \ funcref('s:ApplyErrorF'),
   \ )
   let result = Parser(input)
   Assert vimwiki_extras#parser#is_failure(result), 'Unexpected success: '.printf('%s', result)
@@ -204,9 +274,63 @@ Execute(Apply Parser should fail if parser succeeds and apply func fails):
 Execute(Apply Parser should succeed if parser succeeds and apply func succeeds, returning result):
   let input = vimwiki_extras#parser#input#new('1')
   let Parser = vimwiki_extras#parser#apply(
-  \ {c -> str2nr(c)},
   \ vimwiki_extras#parser#lit('1'),
+  \ {c -> str2nr(c)},
   \ )
   let result = Parser(input)
   AssertEqual 1, result, 'Unexpected result: '.printf('%s', result)
   AssertEqual 1, input.get_pos(), 'Input advanced to wrong position: '.input.get_pos()
+
+Execute(Predicate Parser should fail if the subparser fails):
+  let input = vimwiki_extras#parser#input#new('a')
+  let Parser = vimwiki_extras#parser#predicate(
+  \ vimwiki_extras#parser#lit('1'),
+  \ {_ -> 1},
+  \ )
+  let result = Parser(input)
+  Assert vimwiki_extras#parser#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
+
+Execute(Predicate Parser should fail if parser succeeds and predicate func fails):
+  let input = vimwiki_extras#parser#input#new('abc')
+  function! s:ApplyErrorF(c) abort
+    throw 'Did not handle error!'
+  endfunction
+
+  let Parser = vimwiki_extras#parser#predicate(
+  \ vimwiki_extras#parser#lit('abc'),
+  \ funcref('s:ApplyErrorF'),
+  \ )
+  let result = Parser(input)
+  Assert vimwiki_extras#parser#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
+
+Execute(Predicate Parser should fail if parser succeeds and predicate func yields false):
+  let input = vimwiki_extras#parser#input#new('1')
+  let Parser = vimwiki_extras#parser#predicate(
+  \ vimwiki_extras#parser#lit('1'),
+  \ {_ -> 0},
+  \ )
+  let result = Parser(input)
+  Assert vimwiki_extras#parser#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
+
+Execute(Predicate Parser should succeed if parser succeeds and predicate func yields true, returning result):
+  let input = vimwiki_extras#parser#input#new('1')
+  let Parser = vimwiki_extras#parser#predicate(
+  \ vimwiki_extras#parser#lit('1'),
+  \ {_ -> 1},
+  \ )
+  let result = Parser(input)
+  Assert result, 'Unexpected result: '.printf('%s', result)
+  AssertEqual 1, input.get_pos(), 'Input advanced to wrong position: '.input.get_pos()
+
+Execute(Predicate Parser should pass subparser result to predicate func):
+  let input = vimwiki_extras#parser#input#new('abc')
+  let Parser = vimwiki_extras#parser#predicate(
+  \ vimwiki_extras#parser#lit('abc'),
+  \ {c -> c ==# 'abc'},
+  \ )
+  let result = Parser(input)
+  AssertEqual 'abc', result, 'Unexpected result: '.printf('%s', result)
+  AssertEqual 3, input.get_pos(), 'Input advanced to wrong position: '.input.get_pos()

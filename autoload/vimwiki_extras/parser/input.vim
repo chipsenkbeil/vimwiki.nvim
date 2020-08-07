@@ -58,7 +58,6 @@ endfunction
 
 function! s:self.set_pos(pos) dict abort
     let self._prev_pos = self._pos
-    let self._len -= a:pos - self._pos
     let self._pos = a:pos
 endfunction
 

@@ -16,9 +16,23 @@ set cpoptions&vim
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " TOP-LEVEL API
 
+function! vimwiki_extras#parser#any_char() abort
+    function! s:Parser(input) closure abort
+        if a:input.has_more()
+            let l:c = a:input.read_next()
+            call a:input.advance_next()
+            return l:c
+        else
+            return s:failure
+        endif
+    endfunction
+
+    return funcref('s:Parser')
+endfunction
+
 function! vimwiki_extras#parser#lit(text) abort
     let l:text_len = len(a:text)
-    function! s:LitParser(input) closure abort
+    function! s:Parser(input) closure abort
         let l:r = a:input.read_n(l:text_len)
         if l:r ==# a:text
             call a:input.advance_n(l:text_len)
@@ -28,7 +42,42 @@ function! vimwiki_extras#parser#lit(text) abort
         endif
     endfunction
 
-    return funcref('s:LitParser')
+    return funcref('s:Parser')
+endfunction
+
+function! vimwiki_extras#parser#oneOrMore(parser) abort
+    let l:RepeatParser = vimwiki_extras#parser#repeat(a:parser)
+    function! s:Parser(input) closure abort
+        let l:results = l:RepeatParser(a:input)
+
+        if empty(l:results)
+            return s:failure
+        else
+            return l:results
+        endif
+    endfunction
+
+    return funcref('s:Parser')
+endfunction
+
+function! vimwiki_extras#parser#repeat(parser) abort
+    function! s:Parser(input) closure abort
+        let l:results = []
+
+        while a:input.has_more()
+            let l:result = a:parser(a:input)
+
+            if s:is_failure(l:result)
+                break
+            endif
+
+            let l:results += [l:result]
+        endwhile
+
+        return l:results
+    endfunction
+
+    return funcref('s:Parser')
 endfunction
 
 function! vimwiki_extras#parser#zeroOrOne(parser) abort
@@ -36,7 +85,7 @@ function! vimwiki_extras#parser#zeroOrOne(parser) abort
 endfunction
 
 function! vimwiki_extras#parser#repeatNM(parser, n, m) abort
-    function! s:RepeatNMParser(input) closure abort
+    function! s:Parser(input) closure abort
         if a:n > a:m
             return s:failure
         endif
@@ -63,11 +112,11 @@ function! vimwiki_extras#parser#repeatNM(parser, n, m) abort
         endif
     endfunction
 
-    return funcref('s:RepeatNMParser')
+    return funcref('s:Parser')
 endfunction
 
 function! vimwiki_extras#parser#not(parser) abort
-    function! s:NotParser(input) closure abort
+    function! s:Parser(input) closure abort
         let l:pos = a:input.get_pos()
         let l:result = a:parser(a:input)
         if !s:is_failure(l:result)
@@ -80,12 +129,12 @@ function! vimwiki_extras#parser#not(parser) abort
         return l:r
     endfunction
 
-    return funcref('s:NotParser')
+    return funcref('s:Parser')
 endfunction
 
 function! vimwiki_extras#parser#or(...) abort
     let l:parsers = a:000
-    function! s:OrParser(input) closure abort
+    function! s:Parser(input) closure abort
         for l:Parser in l:parsers
             let l:result = l:Parser(a:input)
             if !s:is_failure(l:result)
@@ -96,12 +145,12 @@ function! vimwiki_extras#parser#or(...) abort
         return s:failure
     endfunction
 
-    return funcref('s:OrParser')
+    return funcref('s:Parser')
 endfunction
 
 function! vimwiki_extras#parser#and(...) abort
     let l:parsers = a:000
-    function! s:AndParser(input) closure abort
+    function! s:Parser(input) closure abort
         let l:pos = a:input.get_pos()
         let l:results = []
         for l:Parser in l:parsers
@@ -117,11 +166,11 @@ function! vimwiki_extras#parser#and(...) abort
         return l:results
     endfunction
 
-    return funcref('s:AndParser')
+    return funcref('s:Parser')
 endfunction
 
-function! vimwiki_extras#parser#apply(f, parser) abort
-    function! s:ApplyParser(input) closure abort
+function! vimwiki_extras#parser#apply(parser, f) abort
+    function! s:Parser(input) closure abort
         let l:pos = a:input.get_pos()
         let l:result = a:parser(a:input)
         if s:is_failure(l:result)
@@ -137,7 +186,29 @@ function! vimwiki_extras#parser#apply(f, parser) abort
         endif
     endfunction
 
-    return funcref('s:ApplyParser')
+    return funcref('s:Parser')
+endfunction
+
+function! vimwiki_extras#parser#predicate(parser, pred) abort
+    function! s:Parser(input) closure abort
+        let l:pos = a:input.get_pos()
+        let l:result = a:parser(a:input)
+
+        try
+            let l:pred_result = a:pred(l:result)
+            if l:pred_result
+                return l:result
+            else
+                call a:input.set_pos(l:pos)
+                return s:failure
+            endif
+        catch
+            call a:input.set_pos(l:pos)
+            return s:failure
+        endtry
+    endfunction
+
+    return funcref('s:Parser')
 endfunction
 
 function! vimwiki_extras#parser#is_failure(result) abort

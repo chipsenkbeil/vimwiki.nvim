@@ -5,7 +5,7 @@ Execute(AnyChar Parser should fail if no input left):
 
   call input.advance_next()
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 1, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(AnyChar Parser should next character if available):
@@ -23,7 +23,7 @@ Execute(Lit Parser should fail if input not a match):
   let Parser = builder.lit('b')
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(Lit Parser should return match if succeeds):
@@ -41,7 +41,7 @@ Execute(Lit Parser should not advance at all if part of text matches):
   let Parser = builder.lit('ab')
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(Lit Parser should support text with length greater than 1):
@@ -59,7 +59,7 @@ Execute(OneOrMore Parser should fail if zero matches):
   let Parser = builder.oneOrMore(builder.lit('b'))
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(OneOrMore Parser should run until a failure is reached, returning results):
@@ -113,7 +113,7 @@ Execute(ZeroOrOne Parser should fail if more than one match):
   let Parser = builder.zeroOrOne(builder.lit('a'))
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(ZeroOrOne Parser should succeed and return empty if zero matches):
@@ -140,7 +140,7 @@ Execute(Exactly Parser should fail if matches less than N):
   let Parser = builder.exactly(builder.lit('a'), 2)
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(Exactly Parser should fail if matches more than N):
@@ -149,7 +149,7 @@ Execute(Exactly Parser should fail if matches more than N):
   let Parser = builder.exactly(builder.lit('a'), 2)
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(Exactly Parser should succeed if I == N, returning I results):
@@ -167,7 +167,7 @@ Execute(RepeatNM Parser should fail if matches less than N):
   let Parser = builder.repeatNM(builder.lit('a'), 2, 3)
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(RepeatNM Parser should fail if matches more than M):
@@ -176,7 +176,7 @@ Execute(RepeatNM Parser should fail if matches more than M):
   let Parser = builder.repeatNM(builder.lit('a'), 2, 3)
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(RepeatNM Parser should succeed if I >= N and I <= M, returning I results):
@@ -202,7 +202,7 @@ Execute(Not Parser should fail if provided parser succeeds):
   let Parser = builder.not(builder.lit('a'))
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(Not Parser should succeed if provided parser fails, returning the next character):
@@ -220,7 +220,7 @@ Execute(Or Parser should fail if all provided parsers fail):
   let Parser = builder.or(builder.lit('b'), builder.lit('c'))
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(Or Parser should succeed if first parser succeeds, return its result):
@@ -256,7 +256,7 @@ Execute(And Parser should fail if first parser fails):
   let Parser = builder.and(builder.lit('b'), builder.lit('a'))
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(And Parser should fail if last parser fails):
@@ -265,7 +265,7 @@ Execute(And Parser should fail if last parser fails):
   let Parser = builder.and(builder.lit('a'), builder.lit('c'))
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(And Parser should fail if any parser fails):
@@ -274,7 +274,7 @@ Execute(And Parser should fail if any parser fails):
   let Parser = builder.and(builder.lit('a'), builder.lit('d'), builder.lit('c'))
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(And Parser should succeed if all parsers succeeds, returning their results):
@@ -292,7 +292,7 @@ Execute(Apply Parser should fail if the subparser fails):
   let Parser = builder.apply(builder.lit('1'), {c -> str2nr(c)})
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(Apply Parser should fail if parser succeeds and apply func fails):
@@ -305,7 +305,7 @@ Execute(Apply Parser should fail if parser succeeds and apply func fails):
   let Parser = builder.apply(builder.lit('abc'), funcref('s:ApplyErrorF'))
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(Apply Parser should succeed if parser succeeds and apply func succeeds, returning result):
@@ -329,7 +329,7 @@ Execute(SideEffect Parser should fail if the subparser fails):
   let Parser = builder.side_effect(builder.lit('1'), funcref('s:SideEffectF'))
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual test_var, 0, 'Side effect took place unexpectedly'
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
@@ -345,7 +345,7 @@ Execute(SideEffect Parser should fail if the side effect func fails):
   let Parser = builder.side_effect(builder.lit('a'), funcref('s:SideEffectErrorF'))
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual test_var, 0, 'Side effect took place unexpectedly'
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
@@ -380,7 +380,7 @@ Execute(Predicate Parser should fail if the subparser fails):
   let Parser = builder.predicate(builder.lit('1'), {_ -> 1})
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(Predicate Parser should fail if parser succeeds and predicate func fails):
@@ -393,7 +393,7 @@ Execute(Predicate Parser should fail if parser succeeds and predicate func fails
   let Parser = builder.predicate(builder.lit('abc'), funcref('s:ApplyErrorF'))
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(Predicate Parser should fail if parser succeeds and predicate func yields false):
@@ -402,7 +402,7 @@ Execute(Predicate Parser should fail if parser succeeds and predicate func yield
   let Parser = builder.predicate(builder.lit('1'), {_ -> 0})
 
   let result = Parser(input)
-  Assert vimwiki_extras#lang#utils#builder#is_failure(result), 'Unexpected success: '.printf('%s', result)
+  Assert vimwiki_extras#lang#utils#result#is_failure(result), 'Unexpected success: '.printf('%s', result)
   AssertEqual 0, input.get_pos(), 'Input advanced unexpectedly'
 
 Execute(Predicate Parser should succeed if parser succeeds and predicate func yields true, returning result):

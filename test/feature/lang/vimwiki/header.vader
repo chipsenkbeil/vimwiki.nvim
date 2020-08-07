@@ -28,4 +28,4 @@ Given vimwiki (Unbalanced Header):
 Execute(Fail to parse correctly):
   let lang = vimwiki_extras#lang#vimwiki#new()
   let result = lang.parse(getline(1))
-  AssertEqual 'failure', result['type']
+  Assert vimwiki_extras#lang#utils#result#is_failure(result)

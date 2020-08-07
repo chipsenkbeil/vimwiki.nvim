@@ -265,23 +265,15 @@ function! s:self.side_effect(parser, f) dict abort
     return funcref('s:Parser')
 endfunction
 
-function! vimwiki_extras#lang#utils#builder#is_failure(result) abort
-    return s:is_failure(a:result)
-endfunction
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " INTERNAL API
 
 function! s:make_failure(msg, cause) abort
-    return {
-    \ 'type': 'failure',
-    \ 'msg': printf('%s', a:msg),
-    \ 'cause': a:cause,
-    \ }
+    return vimwiki_extras#lang#utils#result#failure(a:msg, a:cause)
 endfunction
 
 function! s:is_failure(result) abort
-    return type(a:result) == v:t_dict && get(a:result, 'type') ==# 'failure'
+    return vimwiki_extras#lang#utils#result#is_failure(a:result)
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

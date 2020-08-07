@@ -1,0 +1,31 @@
+Given vimwiki (Single word header):
+  = Header =
+
+Execute(Parse correctly):
+  let lang = vimwiki_extras#lang#vimwiki#new()
+  let result = lang.parse(getline(1))
+  AssertEqual {'type': 'header', 'level': 1, 'text': 'Header'}, result
+
+Given vimwiki (Multi word header):
+  = Header 2 =
+
+Execute(Parse correctly):
+  let lang = vimwiki_extras#lang#vimwiki#new()
+  let result = lang.parse(getline(1))
+  AssertEqual {'type': 'header', 'level': 1, 'text': 'Header 2'}, result
+
+Given vimwiki (Deep Level Header):
+  === Deep Header ===
+
+Execute(Parse correctly):
+  let lang = vimwiki_extras#lang#vimwiki#new()
+  let result = lang.parse(getline(1))
+  AssertEqual {'type': 'header', 'level': 3, 'text': 'Deep Header'}, result
+
+Given vimwiki (Unbalanced Header):
+  === Bad Header ==
+
+Execute(Fail to parse correctly):
+  let lang = vimwiki_extras#lang#vimwiki#new()
+  let result = lang.parse(getline(1))
+  AssertEqual 'failure', result['type']

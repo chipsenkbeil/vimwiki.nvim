@@ -16,21 +16,27 @@ set cpoptions&vim
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " TOP-LEVEL API
 
-function! vimwiki_extras#parser#any_char() abort
+function! vimwiki_extras#parser#new_builder() abort
+    return copy(s:self)
+endfunction
+
+let s:self = {}
+
+function! s:self.any_char() dict abort
     function! s:Parser(input) closure abort
         if a:input.has_more()
             let l:c = a:input.read_next()
             call a:input.advance_next()
             return l:c
         else
-            return s:failure
+            return s:make_failure('any_char: No more input available', v:null)
         endif
     endfunction
 
     return funcref('s:Parser')
 endfunction
 
-function! vimwiki_extras#parser#lit(text) abort
+function! s:self.lit(text) dict abort
     let l:text_len = len(a:text)
     function! s:Parser(input) closure abort
         let l:r = a:input.read_n(l:text_len)
@@ -38,20 +44,26 @@ function! vimwiki_extras#parser#lit(text) abort
             call a:input.advance_n(l:text_len)
             return a:text
         else
-            return s:failure
+            return s:make_failure(
+            \ 'lit: Looking for "'.a:text.'", but found "'.l:r.'"',
+            \ v:null,
+            \ )
         endif
     endfunction
 
     return funcref('s:Parser')
 endfunction
 
-function! vimwiki_extras#parser#oneOrMore(parser) abort
-    let l:RepeatParser = vimwiki_extras#parser#repeat(a:parser)
+function! s:self.oneOrMore(parser) dict abort
+    let l:RepeatParser = self.repeat(a:parser)
     function! s:Parser(input) closure abort
         let l:results = l:RepeatParser(a:input)
 
         if empty(l:results)
-            return s:failure
+            return s:make_failure(
+            \ 'oneOrMore: Found zero results, but expected one or more',
+            \ v:null,
+            \ )
         else
             return l:results
         endif
@@ -60,7 +72,7 @@ function! vimwiki_extras#parser#oneOrMore(parser) abort
     return funcref('s:Parser')
 endfunction
 
-function! vimwiki_extras#parser#repeat(parser) abort
+function! s:self.repeat(parser) dict abort
     function! s:Parser(input) closure abort
         let l:results = []
 
@@ -80,14 +92,18 @@ function! vimwiki_extras#parser#repeat(parser) abort
     return funcref('s:Parser')
 endfunction
 
-function! vimwiki_extras#parser#zeroOrOne(parser) abort
-    return vimwiki_extras#parser#repeatNM(a:parser, 0, 1)
+function! s:self.zeroOrOne(parser) dict abort
+    return self.repeatNM(a:parser, 0, 1)
 endfunction
 
-function! vimwiki_extras#parser#repeatNM(parser, n, m) abort
+function! s:self.exactly(parser, n) dict abort
+    return self.repeatNM(a:parser, a:n, a:n)
+endfunction
+
+function! s:self.repeatNM(parser, n, m) dict abort
     function! s:Parser(input) closure abort
         if a:n > a:m
-            return s:failure
+            return s:make_failure('repeatNM: n > m', v:null)
         endif
 
         let l:i = 0
@@ -108,20 +124,26 @@ function! vimwiki_extras#parser#repeatNM(parser, n, m) abort
             return l:results
         else
             call a:input.set_pos(l:pos)
-            return s:failure
+            return s:make_failure(
+            \ 'repeatNM: Wanted in range ['.a:n.','.a:m.'], but found '.l:i.' matches',
+            \ v:null,
+            \ )
         endif
     endfunction
 
     return funcref('s:Parser')
 endfunction
 
-function! vimwiki_extras#parser#not(parser) abort
+function! s:self.not(parser) dict abort
     function! s:Parser(input) closure abort
         let l:pos = a:input.get_pos()
         let l:result = a:parser(a:input)
         if !s:is_failure(l:result)
             call a:input.set_pos(l:pos)
-            return s:failure
+            return s:make_failure(
+            \ 'not: Unexpectedly succeeded with '.printf('%s', l:result),
+            \ v:null,
+            \ )
         endif
 
         let l:r = a:input.read_next()
@@ -132,7 +154,7 @@ function! vimwiki_extras#parser#not(parser) abort
     return funcref('s:Parser')
 endfunction
 
-function! vimwiki_extras#parser#or(...) abort
+function! s:self.or(...) dict abort
     let l:parsers = a:000
     function! s:Parser(input) closure abort
         for l:Parser in l:parsers
@@ -142,13 +164,13 @@ function! vimwiki_extras#parser#or(...) abort
             endif
         endfor
 
-        return s:failure
+        return s:make_failure('or: No match found', v:null)
     endfunction
 
     return funcref('s:Parser')
 endfunction
 
-function! vimwiki_extras#parser#and(...) abort
+function! s:self.and(...) dict abort
     let l:parsers = a:000
     function! s:Parser(input) closure abort
         let l:pos = a:input.get_pos()
@@ -157,7 +179,7 @@ function! vimwiki_extras#parser#and(...) abort
             let l:result = l:Parser(a:input)
             if s:is_failure(l:result)
                 call a:input.set_pos(l:pos)
-                return s:failure
+                return s:make_failure('and: Failed some match', l:result)
             else
                 let l:results += [l:result]
             endif
@@ -169,19 +191,22 @@ function! vimwiki_extras#parser#and(...) abort
     return funcref('s:Parser')
 endfunction
 
-function! vimwiki_extras#parser#apply(parser, f) abort
+function! s:self.apply(parser, f) dict abort
     function! s:Parser(input) closure abort
         let l:pos = a:input.get_pos()
         let l:result = a:parser(a:input)
         if s:is_failure(l:result)
-            return s:failure
+            return s:make_failure('apply: Failed to match', l:result)
         else
             try
                 let l:f_result = a:f(l:result)
                 return l:f_result
             catch
                 call a:input.set_pos(l:pos)
-                return s:failure
+                return s:make_failure(
+                \ 'apply: '.printf('%s', v:exception),
+                \ v:null,
+                \ )
             endtry
         endif
     endfunction
@@ -189,10 +214,13 @@ function! vimwiki_extras#parser#apply(parser, f) abort
     return funcref('s:Parser')
 endfunction
 
-function! vimwiki_extras#parser#predicate(parser, pred) abort
+function! s:self.predicate(parser, pred) dict abort
     function! s:Parser(input) closure abort
         let l:pos = a:input.get_pos()
         let l:result = a:parser(a:input)
+        if s:is_failure(l:result)
+            return s:make_failure('predicate: Subparser failed', l:result)
+        endif
 
         try
             let l:pred_result = a:pred(l:result)
@@ -200,12 +228,38 @@ function! vimwiki_extras#parser#predicate(parser, pred) abort
                 return l:result
             else
                 call a:input.set_pos(l:pos)
-                return s:failure
+                return s:make_failure('predicate: Predicate failed', v:null)
             endif
         catch
             call a:input.set_pos(l:pos)
-            return s:failure
+            return s:make_failure(
+            \ 'predicate: '.printf('%s', v:exception),
+            \ v:null,
+            \ )
         endtry
+    endfunction
+
+    return funcref('s:Parser')
+endfunction
+
+function! s:self.side_effect(parser, f) dict abort
+    function! s:Parser(input) closure abort
+        let l:pos = a:input.get_pos()
+        let l:result = a:parser(a:input)
+        if s:is_failure(l:result)
+            return s:make_failure('side_effect: Failed to match', l:result)
+        else
+            try
+                call a:f(l:result)
+                return l:result
+            catch
+                call a:input.set_pos(l:pos)
+                return s:make_failure(
+                \ 'apply: '.printf('%s', v:exception),
+                \ v:null,
+                \ )
+            endtry
+        endif
     endfunction
 
     return funcref('s:Parser')
@@ -218,14 +272,16 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " INTERNAL API
 
-function s:SID()
-    return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
-endfun
-
-let s:failure = s:SID().'<FAILURE>'
+function! s:make_failure(msg, cause) abort
+    return {
+    \ 'type': 'failure',
+    \ 'msg': printf('%s', a:msg),
+    \ 'cause': a:cause,
+    \ }
+endfunction
 
 function! s:is_failure(result) abort
-    return a:result ==# s:failure
+    return type(a:result) == v:t_dict && get(a:result, 'type') ==# 'failure'
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -1,0 +1,4 @@
+~ Langauges
+Include (vimwiki):            feature/lang/vimwiki.vader
+Include (markdown):           feature/lang/markdown.vader
+Include (mediawiki):          feature/lang/mediawiki.vader

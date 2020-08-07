@@ -20,7 +20,7 @@ function! vimwiki_extras#lang#vimwiki#new()
     return copy(s:self)
 endfunction
 
-let s:self = vimwiki_extras#lang#new()
+let s:self = {}
 
 " TODO: Use matchlist() to get ... regex may be too hard for the entire prog
 " Could try the syntax groups...
@@ -41,12 +41,38 @@ let s:self = vimwiki_extras#lang#new()
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " PUBLIC METHODS
 
-" N/A
+function! s:self.parse(text) dict abort
+    let l:input = vimwiki_extras#parser#input#new(a:text)
+
+    let l:Parser = s:header()
+
+    return l:Parser(l:input)
+endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " INTERNAL METHODS
 
-" N/A
+function! s:header() abort
+    let l:b = vimwiki_extras#parser#new_builder()
+
+    return b.apply(
+    \ b.predicate(
+    \   b.and(
+    \       b.oneOrMore(b.lit('=')),
+    \       b.lit(' '),
+    \       b.oneOrMore(b.not(b.lit(' ='))),
+    \       b.lit(' '),
+    \       b.oneOrMore(b.lit('=')),
+    \   ),
+    \   {r -> len(r[0]) == len(r[4])},
+    \ ),
+    \ {r -> {
+    \   'type': 'header',
+    \   'level': len(r[0]),
+    \   'text': join(r[2], ''),
+    \ }},
+    \ )
+endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

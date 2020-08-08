@@ -37,19 +37,16 @@ function! vimwiki_extras#lang#vimwiki#header#parser() abort
     return b.apply(
     \ b.predicate(
     \   b.and(
-    \       b.oneOrMore(b.lit('=')),
-    \       b.lit(' '),
-    \       b.oneOrMore(b.not(b.lit(' ='))),
-    \       b.lit(' '),
-    \       b.oneOrMore(b.lit('=')),
+    \     b.zeroOrMore(b.lit(' ')),
+    \     b.oneOrMore(b.lit('=')),
+    \     b.lit(' '),
+    \     b.oneOrMore(b.not(b.lit(' ='))),
+    \     b.lit(' '),
+    \     b.oneOrMore(b.lit('=')),
     \   ),
-    \   {r -> len(r[0]) == len(r[4])},
+    \   {r -> len(r[1]) == len(r[5])},
     \ ),
-    \ {r -> {
-    \   'type': 'header',
-    \   'level': len(r[0]),
-    \   'text': join(r[2], ''),
-    \ }},
+    \ {r -> vimwiki_extras#lang#vimwiki#header#new(len(r[1]), join(r[3], ''))},
     \ )
 endfunction
 
@@ -57,11 +54,11 @@ endfunction
 " DATA API
 
 function! s:self.get_text() dict abort
-    return s:self._text
+    return self._text
 endfunction
 
 function! s:self.get_level() dict abort
-    return s:self._level
+    return self._level
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -70,6 +67,24 @@ endfunction
 function! s:self.set_text(text) dict abort
     let self._text = a:text
     " TODO: Perform update directly in the buffer
+endfunction
+
+function! s:self.set_level(level) dict abort
+    " Ignore setting a bad level
+    if a:level <= 0
+        return
+    endif
+
+    let self._level = a:level
+    " TODO: Perform update directly in the buffer
+endfunction
+
+function! s:self.increase_level() dict abort
+    call self.set_level(self.get_level() + 1)
+endfunction
+
+function! s:self.decrease_level() dict abort
+    call self.set_level(self.get_level() - 1)
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

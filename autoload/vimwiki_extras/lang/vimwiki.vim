@@ -43,8 +43,11 @@ let s:self = {}
 
 function! s:self.parse(text) dict abort
     let l:input = vimwiki_extras#lang#utils#input#new(a:text)
+    let l:b = vimwiki_extras#lang#utils#builder#new()
 
-    let l:Parser = s:header()
+    let l:Parser = l:b.or(
+    \ vimwiki_extras#lang#vimwiki#header#parser(),
+    \ )
 
     return l:Parser(l:input)
 endfunction
@@ -52,27 +55,7 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " INTERNAL METHODS
 
-function! s:header() abort
-    let l:b = vimwiki_extras#lang#utils#builder#new()
-
-    return b.apply(
-    \ b.predicate(
-    \   b.and(
-    \       b.oneOrMore(b.lit('=')),
-    \       b.lit(' '),
-    \       b.oneOrMore(b.not(b.lit(' ='))),
-    \       b.lit(' '),
-    \       b.oneOrMore(b.lit('=')),
-    \   ),
-    \   {r -> len(r[0]) == len(r[4])},
-    \ ),
-    \ {r -> {
-    \   'type': 'header',
-    \   'level': len(r[0]),
-    \   'text': join(r[2], ''),
-    \ }},
-    \ )
-endfunction
+" N/A
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

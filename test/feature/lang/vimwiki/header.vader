@@ -2,30 +2,51 @@ Given vimwiki (Single word header):
   = Header =
 
 Execute(Parse correctly):
-  let lang = vimwiki_extras#lang#vimwiki#new()
-  let result = lang.parse(getline(1))
-  AssertEqual {'type': 'header', 'level': 1, 'text': 'Header'}, result
+  let input = vimwiki_extras#lang#utils#input#new(getline(1))
+  let Parser = vimwiki_extras#lang#vimwiki#header#parser()
+  let result = Parser(input)
+  AssertEqual 'header', result.get_type(), 'Wrong type for header'
+  AssertEqual 1, result.get_level(), 'Wrong header level: '.result.get_level()
+  AssertEqual 'Header', result.get_text(), 'Wrong header text: '.result.get_text()
 
 Given vimwiki (Multi word header):
   = Header 2 =
 
 Execute(Parse correctly):
-  let lang = vimwiki_extras#lang#vimwiki#new()
-  let result = lang.parse(getline(1))
-  AssertEqual {'type': 'header', 'level': 1, 'text': 'Header 2'}, result
+  let input = vimwiki_extras#lang#utils#input#new(getline(1))
+  let Parser = vimwiki_extras#lang#vimwiki#header#parser()
+  let result = Parser(input)
+  AssertEqual 'header', result.get_type(), 'Wrong type for header'
+  AssertEqual 1, result.get_level(), 'Wrong header level: '.result.get_level()
+  AssertEqual 'Header 2', result.get_text(), 'Wrong header text: '.result.get_text()
 
 Given vimwiki (Deep Level Header):
   === Deep Header ===
 
 Execute(Parse correctly):
-  let lang = vimwiki_extras#lang#vimwiki#new()
-  let result = lang.parse(getline(1))
-  AssertEqual {'type': 'header', 'level': 3, 'text': 'Deep Header'}, result
+  let input = vimwiki_extras#lang#utils#input#new(getline(1))
+  let Parser = vimwiki_extras#lang#vimwiki#header#parser()
+  let result = Parser(input)
+  AssertEqual 'header', result.get_type(), 'Wrong type for header'
+  AssertEqual 3, result.get_level(), 'Wrong header level: '.result.get_level()
+  AssertEqual 'Deep Header', result.get_text(), 'Wrong header text: '.result.get_text()
+
+Given vimwiki (Centered Header):
+                      = Centered Header =
+
+Execute(Parse correctly):
+  let input = vimwiki_extras#lang#utils#input#new(getline(1))
+  let Parser = vimwiki_extras#lang#vimwiki#header#parser()
+  let result = Parser(input)
+  AssertEqual 'header', result.get_type(), 'Wrong type for header'
+  AssertEqual 1, result.get_level(), 'Wrong header level: '.result.get_level()
+  AssertEqual 'Centered Header', result.get_text(), 'Wrong header text: '.result.get_text()
 
 Given vimwiki (Unbalanced Header):
   === Bad Header ==
 
 Execute(Fail to parse correctly):
-  let lang = vimwiki_extras#lang#vimwiki#new()
-  let result = lang.parse(getline(1))
+  let input = vimwiki_extras#lang#utils#input#new(getline(1))
+  let Parser = vimwiki_extras#lang#vimwiki#header#parser()
+  let result = Parser(input)
   Assert vimwiki_extras#lang#utils#result#is_failure(result)

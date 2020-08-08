@@ -92,6 +92,10 @@ function! s:self.repeat(parser) dict abort
     return funcref('s:Parser')
 endfunction
 
+function! s:self.zeroOrMore(parser) dict abort
+    return self.repeat(a:parser)
+endfunction
+
 function! s:self.zeroOrOne(parser) dict abort
     return self.repeatNM(a:parser, 0, 1)
 endfunction

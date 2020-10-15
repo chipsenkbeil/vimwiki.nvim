@@ -1,6 +1,6 @@
-# vimwiki-extras
+# vimwiki-server.nvim
 
-Extra utilities and experiments for use with vimwiki.
+Neovim plugin to communicate and leverage [vimwiki-server](https://github.com/chipsenkbeil/vimwiki-rs).
 
 ## Table of Contents
 
@@ -21,7 +21,7 @@ TODO
 
 ```vim
 Plug 'vimwiki/vimwiki'
-Plug 'chipsenkbeil/vimwiki-extras'
+Plug 'chipsenkbeil/vimwiki-server.nvim'
 ```
 
 <a name="contributing"></a>

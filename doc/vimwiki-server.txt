@@ -1,20 +1,20 @@
-*vimwiki-extras.txt*    Extra functionality and experiments for vimwiki.
-*vimwiki-extras* *vimwiki_extras* *vimwikiextras*
+*vimwiki-server.txt*    Extra functionality and experiments for vimwiki.
+*vimwiki-server* *vimwiki_server* *vimwikiserver*
 
 ===============================================================================
-CONTENTS                                              *vimwiki-extras-contents*
+CONTENTS                                              *vimwiki-server-contents*
 
-  1. Introduction.........................|vimwiki-extras-introduction|
-  2. Commands/Keybinds....................|vimwiki-extras-commands|
-  3. API..................................|vimwiki-extras-api|
-  4. Contact..............................|vimwiki-extras-contact|
+  1. Introduction.........................|vimwiki-server-introduction|
+  2. Commands/Keybinds....................|vimwiki-server-commands|
+  3. API..................................|vimwiki-server-api|
+  4. Contact..............................|vimwiki-server-contact|
 
 ===============================================================================
-1. Introduction                                   *vimwiki-extras-introduction*
+1. Introduction                                   *vimwiki-server-introduction*
 
 This plugin integrates with and enhances the fantastic |vimwiki| plugin,
 providing new functionality, alternative parsing APIs, and other experiments
-for use by
+through the `vimwiki-server`.
 
 This plugin supports the following key features:
 
@@ -24,26 +24,26 @@ This plugin supports the following key features:
 4. API for vimwiki language inspection for more advanced manipulation
 
 If you are interested in contributing to the development of this plugin,
-read the developer documentation. See |vimwiki-extras-development|
+read the developer documentation. See |vimwiki-server-development|
 
 ===============================================================================
-2. Commands/Keybinds                                  *vimwiki-extras-commands*
+2. Commands/Keybinds                                  *vimwiki-server-commands*
 
 TODO
 
 ===============================================================================
-3. API                                                     *vimwiki-extras-api*
+3. API                                                     *vimwiki-server-api*
 
 TODO
 
 ===============================================================================
-4. Contact                                             *vimwiki-extras-contact*
+4. Contact                                             *vimwiki-server-contact*
 
 If you like this plugin, and wish to get in touch, check out the GitHub
-page for issues and more at https://github.com/chipsenkbeil/vimwiki-extras
+page for issues and more at https://github.com/chipsenkbeil/vimwiki-server.nvim
 
 If you wish to contact the author of this plugin directly, please feel
-free to send an email to chip.senkbeil@gmail.com.
+free to send an email to chip@senkbeil.org
 
 ===============================================================================
   vim:tw=78:ts=2:sts=2:sw=2:ft=help:norl:

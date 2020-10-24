@@ -33,10 +33,20 @@ function M:clear_state()
 end
 
 -- Starts a new instance of vimwiki-server
-function M:start_server()
+function M:start_server(wikis)
   -- If server is already running, this function does nothing
   if self:is_running() then
       return
+  end
+
+  -- Build our arguments for the vimwiki server, expanding environment the
+  -- environment variables for any of the wikis
+  local args = {"--mode", "stdin"}
+  if wikis then
+    for _, wiki in ipairs(wikis) do
+      args[#args+1] = "--wiki"
+      args[#args+1] = api.nvim_call_function('expand', {wiki})
+    end
   end
 
   local stdin = uv.new_pipe(false)
@@ -52,10 +62,13 @@ function M:start_server()
       -- we build up our ouput and consume all received lines using newline
       -- as the delimiter
       stdout_buf = stdout_buf..chunk
-      local lines = vim.split(output_buf, '\n', true)
+      local lines = vim.split(stdout_buf, '\n', true)
 
-      for line in lines do
-        self:__handler(vim.api.nvim_call_function('json_decode', {line}))
+      -- For each line, if it is not empty, decode it and send to our handler
+      for _, line in ipairs(lines) do
+        if line ~= nil and line ~= "" then
+          self:__handler(api.nvim_call_function('json_decode', {line}))
+        end
       end
     end
   end
@@ -68,7 +81,7 @@ function M:start_server()
   -- TODO: Get list of wikis from vim config for use in arguments
   local handle, pid
   handle, pid = uv.spawn("vimwiki-server", {
-    args = {"--mode", "stdin", "--wiki", "0:$HOME/vimwiki"};
+    args = args;
     stdio = {stdin, stdout, stderr};
     cwd = cwd;
   }, function(code, signal)
@@ -118,22 +131,49 @@ function M:send(msg, cb)
   }
 
   self._state.callbacks[full_msg.id] = cb
-  stdin:write(vim.api.nvim_call_function('json_encode', {full_msg}))
-  stdin:write("\n")
+  self._state.stdin:write(api.nvim_call_function('json_encode', {full_msg}))
+  self._state.stdin:write("\n")
 end
 
 -- Primary event handler for our server, routing received events to the
 -- corresponding callbacks
 function M:__handler(msg)
+  if not msg then
+    return
+  end
+
+  -- {"id": ..., "payload": ...}
   local id = msg.id
   local payload = msg.payload
+
+  if not id or not payload then
+    return
+  end
+
+  -- The response payload is an encoded JSON string that we must decode
+  local response = api.nvim_call_function('json_decode', {payload})
 
   -- Look up our callback and, if it exists, invoke it
   local cb = self._state.callbacks[id]
   self._state.callbacks[id] = nil
   if cb then
-    cb(payload)
+    cb(response)
   end
 end
 
+-- CHIP CHIP CHIP
+--
+-- So far, so good!
+--
+-- EXAMPLE:
+--
+--   s = require('vimwiki_server'):new()
+--   s:start_server({"0:$HOME/vimwiki"})
+--   s:send("{wikiAtIndex(index:0){path}}", function(msg) print(msg.data.wikiAtIndex.path) end)
+--
+--   prints /home/senkwich/vimwiki
+--
+-- Currently, neovim will not exit if the server is running and we :q
+-- Need to figure out what I'm missing to enable vimwiki to exit. Is there
+-- some event we can hook into to close the process?
 return M

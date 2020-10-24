@@ -125,10 +125,17 @@ function M:stop()
   end
 
   local handle = self.__state.handle
+  local stdin = self.__state.stdin
 
   -- Trigger the end of our server
   if handle then
-    uv.process_kill(handle, "SIGINT")
+    stdin:shutdown()
+
+    -- NOTE: This seems to be the required aspect for cleanup
+    if not handle:is_closing() then
+      handle:kill(15)
+    end
+
     self:__clear_state()
   end
 end
@@ -179,19 +186,4 @@ function M:__handler(msg)
   end
 end
 
--- CHIP CHIP CHIP
---
--- So far, so good!
---
--- EXAMPLE:
---
---   s = require('vimwiki_server'):new()
---   s:start_server({"0:$HOME/vimwiki"})
---   s:send("{wikiAtIndex(index:0){path}}", function(msg) print(msg.data.wikiAtIndex.path) end)
---
---   prints /home/senkwich/vimwiki
---
--- Currently, neovim will not exit if the server is running and we :q
--- Need to figure out what I'm missing to enable vimwiki to exit. Is there
--- some event we can hook into to close the process?
 return M

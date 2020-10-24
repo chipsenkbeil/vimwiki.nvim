@@ -47,6 +47,16 @@ let g:loaded_vimwiki_server = 1
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+augroup vimwiki_server
+    autocmd!
+
+    " When entering a vimwiki file, start the server if it is not running
+    autocmd BufEnter *.wiki lua require('vimwiki_server').start()
+
+    " Required to allow neovim to exit if a server is still running
+    autocmd VimLeave * lua require('vimwiki_server').stop()
+augroup END
+
 " Restore VI-compatible behavior configured by user
 let &cpoptions = s:save_cpo
 unlet s:save_cpo

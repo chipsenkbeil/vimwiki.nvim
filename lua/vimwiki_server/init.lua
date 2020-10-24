@@ -8,7 +8,7 @@ local M = {}
 -- Creates a new instance of our client library for the server
 function M:new()
     local instance = {}
-    instance._state = {
+    instance.__state = {
       handle = nil;
       pid = nil;
       stdin = nil;
@@ -20,11 +20,12 @@ end
 
 -- Indicates whether or not the server is running
 function M:is_running()
-    return self._state.handle and self._state.pid and self._state.stdin
+    return self.__state.handle and self.__state.pid and self.__state.stdin
 end
 
-function M:clear_state()
-  self._state = {
+-- Internal helper to clear our state
+function M:__clear_state()
+  self.__state = {
     handle = nil;
     pid = nil;
     stdin = nil;
@@ -32,8 +33,8 @@ function M:clear_state()
   }
 end
 
--- Starts a new instance of vimwiki-server
-function M:start_server(wikis)
+-- Starts an instance of vimwiki-server if not already running
+function M:start(wikis)
   -- If server is already running, this function does nothing
   if self:is_running() then
       return
@@ -98,7 +99,7 @@ function M:start_server(wikis)
     end
 
     -- Regardless of exit, we want to reset our state
-    self:clear_state()
+    self:__clear_state()
   end)
 
   -- After the process has been spawned, we want to begin reading from its
@@ -107,12 +108,29 @@ function M:start_server(wikis)
   stderr:read_start(update_chunk)
 
   -- Finally, we want to store our ability to communicate to the process
-  self._state = {
+  self.__state = {
     handle = handle;
     pid = pid;
     stdin = stdin;
     callbacks = {};
   }
+end
+
+-- Starts an instance of vimwiki-server if running by killing the process
+-- and resetting state
+function M:stop()
+  -- If server is not running, this does nothing
+  if not self:is_running() then
+    return
+  end
+
+  local handle = self.__state.handle
+
+  -- Trigger the end of our server
+  if handle then
+    uv.process_kill(handle, "SIGINT")
+    self:__clear_state()
+  end
 end
 
 -- Send a message to our server
@@ -130,9 +148,9 @@ function M:send(msg, cb)
     payload = msg;
   }
 
-  self._state.callbacks[full_msg.id] = cb
-  self._state.stdin:write(api.nvim_call_function('json_encode', {full_msg}))
-  self._state.stdin:write("\n")
+  self.__state.callbacks[full_msg.id] = cb
+  self.__state.stdin:write(api.nvim_call_function('json_encode', {full_msg}))
+  self.__state.stdin:write("\n")
 end
 
 -- Primary event handler for our server, routing received events to the
@@ -154,8 +172,8 @@ function M:__handler(msg)
   local response = api.nvim_call_function('json_decode', {payload})
 
   -- Look up our callback and, if it exists, invoke it
-  local cb = self._state.callbacks[id]
-  self._state.callbacks[id] = nil
+  local cb = self.__state.callbacks[id]
+  self.__state.callbacks[id] = nil
   if cb then
     cb(response)
   end

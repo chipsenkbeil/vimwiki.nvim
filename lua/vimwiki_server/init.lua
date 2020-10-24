@@ -20,7 +20,7 @@ end
 
 -- Indicates whether or not the server is running
 function M:is_running()
-    return self._state.handle != nil and self._state.pid != nil and self._state.stdin != nil
+    return self._state.handle and self._state.pid and self._state.stdin
 end
 
 function M:clear_state()
@@ -80,7 +80,7 @@ function M:start_server()
 
     -- If the process exited properly, we do nothing, but if it exited badly,
     -- we want to report it!
-    if code != 0 or signal != 0 then
+    if code ~= 0 or signal ~= 0 then
       -- TODO: Report bad process exit
     end
 
@@ -105,7 +105,7 @@ end
 -- Send a message to our server
 function M:send(msg, cb)
   -- If server is not running, this does nothing
-  if !self:is_running() then
+  if not self:is_running() then
     return
   end
 
@@ -131,7 +131,7 @@ function M:__handler(msg)
   -- Look up our callback and, if it exists, invoke it
   local cb = self._state.callbacks[id]
   self._state.callbacks[id] = nil
-  if cb != nil then
+  if cb then
     cb(payload)
   end
 end

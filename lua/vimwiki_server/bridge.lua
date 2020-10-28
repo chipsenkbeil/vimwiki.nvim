@@ -4,18 +4,19 @@ local uv = vim.loop
 
 -- Our module containing functions to call
 local M = {}
+M.__index = M
 
 -- Creates a new instance of our client library for the server
 function M:new()
     local instance = {}
+    setmetatable(instance, M)
     instance.__state = {
       handle = nil;
       pid = nil;
       stdin = nil;
       callbacks = {};
     }
-    self.__index = self
-    return setmetatable(instance, self)
+    return instance
 end
 
 -- Indicates whether or not the server is running

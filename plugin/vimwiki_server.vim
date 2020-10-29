@@ -55,27 +55,32 @@ let g:loaded_vimwiki_server = 1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 onoremap <silent> <Plug>VimwikiServerElement
-    \ :<C-U>lua require('vimwiki_server').select_an_element()<CR>
-vnoremap <silent> <Plug>VimwikiServerElement
-    \ :<C-U>lua require('vimwiki_server').select_an_element()<CR>
+    \ <Esc>:lua require 'vimwiki_server'.select_an_element(true)<CR>
+vnoremap <silent> <Plug>VimwikiServerElementV
+    \ :<C-U>lua require 'vimwiki_server'.select_an_element(false)<CR>
 onoremap <silent> <Plug>VimwikiServerInnerElement
-    \ :<C-U>lua require('vimwiki_server').select_inner_element()<CR>
-vnoremap <silent> <Plug>VimwikiServerInnerElement
-    \ :<C-U>lua require('vimwiki_server').select_inner_element()<CR>
+    \ <Esc>:lua require 'vimwiki_server'.select_inner_element(true)<CR>
+vnoremap <silent> <Plug>VimwikiServerInnerElementV
+    \ :<C-U>lua require 'vimwiki_server'.select_inner_element(false)<CR>
 
 omap ae <Plug>VimwikiServerElement
 omap ie <Plug>VimwikiServerInnerElement
-vmap ae <Plug>VimwikiServerElement
-vmap ie <Plug>VimwikiServerInnerElement
+vmap ae <Plug>VimwikiServerElementV
+vmap ie <Plug>VimwikiServerInnerElementV
+
+" xnoremap <expr>   ij jdaddy#inner_movement(v:count1)
+" onoremap <silent> ij :normal vij<CR>
+" xnoremap <expr>   aj jdaddy#outer_movement(v:count1)
+" onoremap <silent> aj :normal vaj<CR>
 
 augroup vimwiki_server
     autocmd!
 
     " When entering a vimwiki file, start the server if it is not running
-    autocmd BufEnter *.wiki lua require('vimwiki_server').start()
+    autocmd BufEnter *.wiki lua require 'vimwiki_server'.start()
 
     " Required to allow neovim to exit if a server is still running
-    autocmd VimLeave * lua require('vimwiki_server').stop()
+    autocmd VimLeave * lua require 'vimwiki_server'.stop()
 augroup END
 
 " Restore VI-compatible behavior configured by user

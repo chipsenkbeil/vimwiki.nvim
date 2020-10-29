@@ -26,7 +26,14 @@ function M.restart()
   M.start()
 end
 
-function M.select_an_element()
+function M.select_an_element(apply_operator)
+  -- If indicated that we should apply an operator at the end, determine
+  -- which operator is supposed to be applied
+  local operator = nil
+  if apply_operator then
+    operator = api.nvim_get_vvar('operator')
+  end
+
   local path = api.nvim_call_function('expand', {'%:p'})
   local reload = 'true'
   local offset = utils.cursor_offset()
@@ -35,7 +42,7 @@ function M.select_an_element()
   bridge:send(query, (function(res)
     if res.data and res.data.page and res.data.page.nodeAtOffset then
       local region = res.data.page.nodeAtOffset.region
-      utils.select_in_buffer(region.offset, region.len)
+      utils.select_in_buffer(region.offset, region.len, operator)
     elseif res.errors then
       for i, e in ipairs(res.errors) do
         vim.api.nvim_command('echoerr '..e.message)

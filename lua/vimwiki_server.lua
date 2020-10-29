@@ -26,20 +26,16 @@ function M.restart()
   M.start()
 end
 
-function M.select_an_element(apply_operator)
-  -- If indicated that we should apply an operator at the end, determine
-  -- which operator is supposed to be applied
-  local operator = nil
-  if apply_operator then
-    operator = api.nvim_get_vvar('operator')
-  end
-
+-- Synchronous function to select an element under cursor
+function M.select_an_element()
   local path = api.nvim_call_function('expand', {'%:p'})
   local reload = 'true'
   local offset = utils.cursor_offset()
   local query = '{page(path:"'..path..'",reload:'..reload..'){nodeAtOffset(offset:'..offset..'){region{offset,len}}}}'
 
-  bridge:send(query, (function(res)
+  local res = bridge:send_wait(query)
+
+  if res then
     if res.data and res.data.page and res.data.page.nodeAtOffset then
       local region = res.data.page.nodeAtOffset.region
       utils.select_in_buffer(region.offset, region.len, operator)
@@ -48,7 +44,9 @@ function M.select_an_element(apply_operator)
         vim.api.nvim_command('echoerr '..e.message)
       end
     end
-  end))
+  else
+    api.nvim_command('echoerr "Max timeout reached waiting for result"')
+  end
 end
 
 function M.select_inner_element()

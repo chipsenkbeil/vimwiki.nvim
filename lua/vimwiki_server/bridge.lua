@@ -1,6 +1,7 @@
 local vim = vim
 local api = vim.api
 local uv = vim.loop
+local utils = require 'vimwiki_server/utils'
 
 -- Our module containing functions to call
 local M = {}
@@ -159,6 +160,33 @@ function M:send(msg, cb)
   self.__state.callbacks[full_msg.id] = cb
   self.__state.stdin:write(api.nvim_call_function('json_encode', {full_msg}))
   self.__state.stdin:write("\n")
+end
+
+-- Send a message to our server and wait synchronously for the result
+function M:send_wait(msg, timeout, interval)
+  local tmp_name = '__vimwiki_server_bridge_send_wait__'
+  assert(not utils.nvim_has_var(tmp_name))
+
+  self:send(msg, function(data)
+    local data_str = api.nvim_call_function('json_encode', {data})
+    api.nvim_set_var(tmp_name, data_str)
+  end)
+
+  -- Timeout and interval are in milliseconds
+  local timeout = timeout or 1000
+  local interval = interval or 200
+
+  -- Wait for the result to be set, or time out
+  api.nvim_call_function('wait', {timeout, 'exists("'..tmp_name..'")', interval})
+
+  -- Finally, grab and clear our temporary variable if it is set and return
+  -- its value
+  local result = utils.nvim_remove_var(tmp_name)
+  if result then
+    result = api.nvim_call_function('json_decode', {result})
+  end
+
+  return result
 end
 
 -- Primary event handler for our server, routing received events to the

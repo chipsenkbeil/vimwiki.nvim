@@ -55,23 +55,18 @@ let g:loaded_vimwiki_server = 1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 onoremap <silent> <Plug>VimwikiServerElement
-    \ <Esc>:lua require 'vimwiki_server'.select_an_element(true)<CR>
+    \ :<C-U>lua require 'vimwiki_server'.select_an_element()<CR>
 vnoremap <silent> <Plug>VimwikiServerElementV
-    \ :<C-U>lua require 'vimwiki_server'.select_an_element(false)<CR>
+    \ :<C-U>lua require 'vimwiki_server'.select_an_element()<CR>
 onoremap <silent> <Plug>VimwikiServerInnerElement
-    \ <Esc>:lua require 'vimwiki_server'.select_inner_element(true)<CR>
+    \ :<C-U>lua require 'vimwiki_server'.select_inner_element()<CR>
 vnoremap <silent> <Plug>VimwikiServerInnerElementV
-    \ :<C-U>lua require 'vimwiki_server'.select_inner_element(false)<CR>
+    \ :<C-U>lua require 'vimwiki_server'.select_inner_element()<CR>
 
 omap ae <Plug>VimwikiServerElement
 omap ie <Plug>VimwikiServerInnerElement
 vmap ae <Plug>VimwikiServerElementV
 vmap ie <Plug>VimwikiServerInnerElementV
-
-" xnoremap <expr>   ij jdaddy#inner_movement(v:count1)
-" onoremap <silent> ij :normal vij<CR>
-" xnoremap <expr>   aj jdaddy#outer_movement(v:count1)
-" onoremap <silent> aj :normal vaj<CR>
 
 augroup vimwiki_server
     autocmd!

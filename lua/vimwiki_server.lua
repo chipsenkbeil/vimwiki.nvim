@@ -3,8 +3,9 @@ local api = vim.api
 
 local M = {}
 
-local bridge = require('vimwiki_server/bridge'):new()
-local utils = require('vimwiki_server/utils')
+local bridge = require 'vimwiki_server/bridge':new()
+local g = require 'vimwiki_server/graphql'
+local u = require 'vimwiki_server/utils'
 
 -- Primary entrypoint to start main vimwiki server instance
 function M.start()
@@ -29,16 +30,37 @@ end
 -- Synchronous function to select an element under cursor
 function M.select_an_element()
   local path = api.nvim_call_function('expand', {'%:p'})
-  local reload = 'true'
-  local offset = utils.cursor_offset()
-  local query = '{page(path:"'..path..'",reload:'..reload..'){nodeAtOffset(offset:'..offset..'){region{offset,len}}}}'
+  local reload = true
+  local offset = u.cursor_offset()
+  local query = g.new_query({
+    {
+      name = 'page',
+      args = {{'path', path}, {'reload', reload}},
+      children = {
+        {
+          name = 'nodeAtOffset',
+          args = {{'offset', offset}},
+          children = {
+            {
+              name = 'region',
+              children = {
+                {name = 'offset'},
+                {name = 'len'},
+              }
+            }
+          }
+        }
+      }
+    }
+  })
 
   local res = bridge:send_wait(query)
 
   if res then
     if res.data and res.data.page and res.data.page.nodeAtOffset then
-      local region = res.data.page.nodeAtOffset.region
-      utils.select_in_buffer(region.offset, region.len, operator)
+      local node = res.data.page.nodeAtOffset
+      local region = node.region
+      u.select_in_buffer(region.offset, region.len)
     elseif res.errors then
       for i, e in ipairs(res.errors) do
         vim.api.nvim_command('echoerr '..e.message)
@@ -49,8 +71,84 @@ function M.select_an_element()
   end
 end
 
+-- Synchronous function to select the child element(s) of the element under
+-- cursor, or the element under cursor itself if it has no children
 function M.select_inner_element()
-  local query = '{}'
+  local path = api.nvim_call_function('expand', {'%:p'})
+  local reload = true
+  local offset = u.cursor_offset()
+  local query = g.new_query({
+    {
+      name = 'page',
+      args = {{'path', path}, {'reload', reload}},
+      children = {
+        {
+          name = 'nodeAtOffset',
+          args = {{'offset', offset}},
+          children = {
+            {name = 'isLeaf'},
+            {
+              name = 'children',
+              children = {
+                {
+                  name = 'region',
+                  children = {
+                    {name = 'offset'},
+                    {name = 'len'},
+                  }
+                }
+              }
+            },
+            {
+              name = 'region',
+              children = {
+                {name = 'offset'},
+                {name = 'len'},
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+
+  local res = bridge:send_wait(query)
+
+  if res then
+    if res.data and res.data.page and res.data.page.nodeAtOffset then
+      local node = res.data.page.nodeAtOffset
+      local region = nil
+
+      -- If element under cursor is a leaf node, we use its region
+      if node.isLeaf then
+        region = node.region
+
+      -- Otherwise, we calculate the start and len from the children
+      else
+        local offset = u.min(u.filter_map(node.children, (function(c)
+          return c.region.offset
+        end)))
+        local len = u.max(u.filter_map(node.children, (function(c)
+          return c.region.offset + c.region.len
+        end))) - offset
+
+        region = {
+          offset = offset,
+          len = len,
+        }
+      end
+
+      if region then
+        u.select_in_buffer(region.offset, region.len)
+      end
+    elseif res.errors then
+      for i, e in ipairs(res.errors) do
+        vim.api.nvim_command('echoerr '..e.message)
+      end
+    end
+  else
+    api.nvim_command('echoerr "Max timeout reached waiting for result"')
+  end
 end
 
 return M

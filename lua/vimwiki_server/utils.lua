@@ -98,6 +98,62 @@ function M.__unused_nvim_remove_var(name)
   end
 end
 
+-- Returns the maximum value from the array, or nil if there are no elements
+function M.max(array)
+  if not M.is_empty(array) then
+    local max = nil
+    for _, value in ipairs(array) do
+      if not max or value > max then
+        max = value
+      end
+    end
+    return max
+  end
+end
+
+-- Returns the minimum value from the array, or nil if there are no elements
+function M.min(array)
+  if not M.is_empty(array) then
+    local min = nil
+    for _, value in ipairs(array) do
+      if not min or value < min then
+        min = value
+      end
+    end
+    return min
+  end
+end
+
+-- Maps and filters out nil elements in an array using the given function,
+-- returning nil if given nil as the array
+function M.filter_map(array, f)
+  if array == nil then
+    return nil
+  end
+
+  local new_array = {}
+  for i,v in ipairs(array) do
+    local el = f(v)
+    if el then
+      table.insert(new_array, el)
+    end
+  end
+  return new_array
+end
+
+-- Concats an array using the provided separator, returning the resulting
+-- string if non-empty, otherwise will return nil
+function M.concat_nonempty(array, sep)
+  if array and #array > 0 then
+    return table.concat(array, sep)
+  end
+end
+
+-- Checks if an array is empty, returning true if not nil and not empty
+function M.is_empty(array)
+  return next(array or {}) == nil
+end
+
 -- Converts a table to its values as a string, rather than a pointer
 -- From https://stackoverflow.com/a/6081639
 function M.serialize_table(val, name, skipnewlines, depth)

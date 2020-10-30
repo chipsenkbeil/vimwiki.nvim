@@ -31,43 +31,6 @@ endif
 " Enable other plugins to play well with this one
 let g:loaded_vimwiki_server = 1
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-" TODO: Provide shortcuts to API through commands like
-"
-"   command! -bar VimwikiExtrasDoTask :call vimwiki_server#DoTask()
-"   command! -bar -nargs=* VimwikiExtrasDoTaskWithArgs :call vimwiki_server#DoTaskWithArgs(<f-args>)
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-" TODO: Provide plug mappings to API like
-"
-"   nnoremap <silent> <Plug>(vimwiki_server_do_task) :VimwikiExtrasDoTask<Return>
-"   nnoremap <silent> <Plug>(vimwiki_server_do_task_with_args) :VimwikiExtrasDoTaskWithArgs args<Return>
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-" TODO: Provide text objects
-"
-" https://vim.fandom.com/wiki/Creating_new_text_objects
-" :h omap-info
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-onoremap <silent> <Plug>VimwikiServerElement
-    \ :<C-U>lua require 'vimwiki_server'.select_an_element()<CR>
-vnoremap <silent> <Plug>VimwikiServerElementV
-    \ :<C-U>lua require 'vimwiki_server'.select_an_element()<CR>
-onoremap <silent> <Plug>VimwikiServerInnerElement
-    \ :<C-U>lua require 'vimwiki_server'.select_inner_element()<CR>
-vnoremap <silent> <Plug>VimwikiServerInnerElementV
-    \ :<C-U>lua require 'vimwiki_server'.select_inner_element()<CR>
-
-omap ae <Plug>VimwikiServerElement
-omap ie <Plug>VimwikiServerInnerElement
-vmap ae <Plug>VimwikiServerElementV
-vmap ie <Plug>VimwikiServerInnerElementV
-
 augroup vimwiki_server
     autocmd!
 

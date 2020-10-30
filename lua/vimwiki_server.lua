@@ -7,11 +7,34 @@ local bridge = require 'vimwiki_server/bridge':new()
 local g = require 'vimwiki_server/graphql'
 local u = require 'vimwiki_server/utils'
 
+-- Version of vimwiki-server that we require to use this plugin
+local VERSION = {
+  MAJOR = 0,
+  MINOR = 1,
+  PATCH = 0,
+  PRERELEASE = 'alpha',
+  PRERELEASE_VER = 4,
+}
+
 -- Primary entrypoint to start main vimwiki server instance
 function M.start()
   if not bridge:is_running() then
-    if not bridge:check_version(0, 1, 0, 'alpha', 4) then
-      api.nvim_command('echoerr "Incompatible version of vimwiki-server: '..bridge:raw_version()..'"')
+    if not bridge:check_version(
+        VERSION.MAJOR,
+        VERSION.MINOR,
+        VERSION.PATCH,
+        VERSION.PRERELEASE,
+        VERSION.PRERELEASE_VER
+    ) then
+      local v = VERSION.MAJOR..'.'..VERSION.MINOR..'.'..VERSION.PATCH
+      if VERSION.PRERELEASE then
+        v = v..'-'..VERSION.PRERELEASE
+        if VERSION.PRERELEASE_VER then
+          v = v..'.'..VERSION.PRERELEASE_VER
+        end
+      end
+      local raw_v = bridge:raw_version()
+      api.nvim_command('echoerr "Incompatible version of vimwiki-server: '..raw_v..', wanted '..v..'"')
     else
       bridge:start()
     end

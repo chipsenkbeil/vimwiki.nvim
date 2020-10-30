@@ -20,9 +20,21 @@ onoremap <silent><buffer> <Plug>VimwikiServerInnerElement
     \ :<C-U>lua require 'vimwiki_server'.select_inner_element()<CR>
 vnoremap <silent><buffer> <Plug>VimwikiServerInnerElementV
     \ :<C-U>lua require 'vimwiki_server'.select_inner_element()<CR>
+onoremap <silent><buffer> <Plug>VimwikiServerParentElement
+    \ :<C-U>lua require 'vimwiki_server'.select_parent_element()<CR>
+vnoremap <silent><buffer> <Plug>VimwikiServerParentElementV
+    \ :<C-U>lua require 'vimwiki_server'.select_parent_element()<CR>
+onoremap <silent><buffer> <Plug>VimwikiServerRootElement
+    \ :<C-U>lua require 'vimwiki_server'.select_root_element()<CR>
+vnoremap <silent><buffer> <Plug>VimwikiServerRootElementV
+    \ :<C-U>lua require 'vimwiki_server'.select_root_element()<CR>
 
 " Apply our default external mappings for visual and operator-pending modes
 omap <buffer> ae <Plug>VimwikiServerElement
 omap <buffer> ie <Plug>VimwikiServerInnerElement
+omap <buffer> pe <Plug>VimwikiServerParentElement
+omap <buffer> re <Plug>VimwikiServerRootElement
 vmap <buffer> ae <Plug>VimwikiServerElementV
 vmap <buffer> ie <Plug>VimwikiServerInnerElementV
+vmap <buffer> pe <Plug>VimwikiServerParentElementV
+vmap <buffer> re <Plug>VimwikiServerRootElementV

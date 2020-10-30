@@ -98,6 +98,20 @@ function M.__unused_nvim_remove_var(name)
   end
 end
 
+-- Returns the value from the provided table using the given path to get to
+-- it; if the table is nil or the path is unable to be completed, nil is returned
+function M.get(tbl, path)
+  local keys = vim.split(path, '.', true)
+  local value = tbl
+  for i = 1, #keys do
+    value = value[keys[i]]
+
+    if value == nil or i == #keys then
+      return value
+    end
+  end
+end
+
 -- Returns the maximum value from the array, or nil if there are no elements
 function M.max(array)
   if not M.is_empty(array) then

@@ -57,9 +57,104 @@ function M.select_an_element()
   local res = bridge:send_wait(query)
 
   if res then
-    if res.data and res.data.page and res.data.page.nodeAtOffset then
-      local node = res.data.page.nodeAtOffset
-      local region = node.region
+    local region = u.get(res, 'data.page.nodeAtOffset.region')
+    if region then
+      u.select_in_buffer(region.offset, region.len)
+    elseif res.errors then
+      for i, e in ipairs(res.errors) do
+        vim.api.nvim_command('echoerr '..e.message)
+      end
+    end
+  else
+    api.nvim_command('echoerr "Max timeout reached waiting for result"')
+  end
+end
+
+-- Synchronous function to select root of an element under cursor
+function M.select_root_element()
+  local path = api.nvim_call_function('expand', {'%:p'})
+  local reload = true
+  local offset = u.cursor_offset()
+  local query = g.new_query({
+    {
+      name = 'page',
+      args = {{'path', path}, {'reload', reload}},
+      children = {
+        {
+          name = 'nodeAtOffset',
+          args = {{'offset', offset}},
+          children = {
+            {
+              name = 'root',
+              children = {
+                {
+                  name = 'region',
+                  children = {
+                    {name = 'offset'},
+                    {name = 'len'},
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+
+  local res = bridge:send_wait(query)
+
+  if res then
+    local region = u.get(res, 'data.page.nodeAtOffset.root.region')
+    if region then
+      u.select_in_buffer(region.offset, region.len)
+    elseif res.errors then
+      for i, e in ipairs(res.errors) do
+        vim.api.nvim_command('echoerr '..e.message)
+      end
+    end
+  else
+    api.nvim_command('echoerr "Max timeout reached waiting for result"')
+  end
+end
+
+-- Synchronous function to select parent of an element under cursor
+function M.select_parent_element()
+  local path = api.nvim_call_function('expand', {'%:p'})
+  local reload = true
+  local offset = u.cursor_offset()
+  local query = g.new_query({
+    {
+      name = 'page',
+      args = {{'path', path}, {'reload', reload}},
+      children = {
+        {
+          name = 'nodeAtOffset',
+          args = {{'offset', offset}},
+          children = {
+            {
+              name = 'parent',
+              children = {
+                {
+                  name = 'region',
+                  children = {
+                    {name = 'offset'},
+                    {name = 'len'},
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+
+  local res = bridge:send_wait(query)
+
+  if res then
+    local region = u.get(res, 'data.page.nodeAtOffset.parent.region')
+    if region then
       u.select_in_buffer(region.offset, region.len)
     elseif res.errors then
       for i, e in ipairs(res.errors) do
@@ -115,8 +210,8 @@ function M.select_inner_element()
   local res = bridge:send_wait(query)
 
   if res then
-    if res.data and res.data.page and res.data.page.nodeAtOffset then
-      local node = res.data.page.nodeAtOffset
+    local node = u.get(res, 'data.page.nodeAtOffset')
+    if node then
       local region = nil
 
       -- If element under cursor is a leaf node, we use its region

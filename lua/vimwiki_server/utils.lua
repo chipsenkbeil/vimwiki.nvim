@@ -98,6 +98,16 @@ function M.__unused_nvim_remove_var(name)
   end
 end
 
+-- Returns a string with the given prefix removed if it is found in the string
+function M.strip_prefix(s, prefix)
+  local offset = string.find(s, prefix, 1, true)
+  if offset == 1 then
+    return string.sub(s, string.len(prefix) + 1)
+  else
+    return s
+  end
+end
+
 -- Returns the value from the provided table using the given path to get to
 -- it; if the table is nil or the path is unable to be completed, nil is returned
 function M.get(tbl, path)

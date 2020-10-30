@@ -1,7 +1,7 @@
 local vim = vim
 local api = vim.api
 local uv = vim.loop
-local utils = require 'vimwiki_server/utils'
+local u = require 'vimwiki_server/utils'
 
 -- Our module containing functions to call
 local M = {}
@@ -33,6 +33,61 @@ function M:__clear_state()
     stdin = nil;
     callbacks = {};
   }
+end
+
+-- Validates the version of vimwiki-server, returning true if it is okay
+function M:check_version(major, minor, patch, pre_release, pre_release_ver)
+  local v = self:version()
+  if not v then
+    return false
+  end
+
+  local major_okay = not major or v[1] == major
+  local minor_okay = not minor or v[2] == minor
+  local patch_okay = not patch or v[3] == patch
+  local pre_release_okay = not pre_release or v[4] == pre_release
+  local pre_release_ver_okay = not pre_release_ver or v[5] == pre_release_ver
+
+  return major_okay and minor_okay and patch_okay and pre_release_okay and pre_release_ver_okay
+end
+
+-- Retrieves the current version of vimwiki-server, returning it in the form
+-- of [major, minor, patch, pre-release, pre-release-ver] or nil if not available.
+--
+-- Note that pre-release and pre-release ver are optional
+function M:version()
+  local raw_version = self:raw_version()
+  if not raw_version then
+    return nil
+  end
+
+  local version_string = vim.trim(u.strip_prefix(raw_version, 'vimwiki-server'))
+  if not version_string then
+    return nil
+  end
+
+  local version = nil
+
+  local semver, ext = unpack(vim.split(version_string, '-', true))
+  local major, minor, patch = unpack(vim.split(semver, '.', true))
+  if ext then
+    local ext_label, ext_ver = unpack(vim.split(ext, '.', true))
+    version = {major, minor, patch, ext_label, ext_ver}
+  else
+    version = {major, minor, patch}
+  end
+
+  return u.filter_map(version, (function(v)
+    return tonumber(v) or v
+  end))
+end
+
+-- Retrieves the raw version of vimwiki-server from calling --version
+function M:raw_version()
+  local text = api.nvim_call_function('system', {'vimwiki-server --version'})
+  if text then
+    return vim.trim(text)
+  end
 end
 
 -- Starts an instance of vimwiki-server if not already running
@@ -165,7 +220,7 @@ end
 -- Send a message to our server and wait synchronously for the result
 function M:send_wait(msg, timeout, interval)
   local tmp_name = '__vimwiki_server_bridge_send_wait__'
-  assert(not utils.nvim_has_var(tmp_name))
+  assert(not u.nvim_has_var(tmp_name))
 
   self:send(msg, function(data)
     local data_str = api.nvim_call_function('json_encode', {data})
@@ -181,7 +236,7 @@ function M:send_wait(msg, timeout, interval)
 
   -- Finally, grab and clear our temporary variable if it is set and return
   -- its value
-  local result = utils.nvim_remove_var(tmp_name)
+  local result = u.nvim_remove_var(tmp_name)
   if result then
     result = api.nvim_call_function('json_decode', {result})
   end

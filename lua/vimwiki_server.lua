@@ -10,7 +10,11 @@ local u = require 'vimwiki_server/utils'
 -- Primary entrypoint to start main vimwiki server instance
 function M.start()
   if not bridge:is_running() then
-    bridge:start()
+    if not bridge:check_version(0, 1, 0, 'alpha', 4) then
+      api.nvim_command('echoerr "Incompatible version of vimwiki-server: '..bridge:raw_version()..'"')
+    else
+      bridge:start()
+    end
   end
 end
 

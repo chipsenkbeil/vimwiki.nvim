@@ -36,7 +36,19 @@ function M.start()
       local raw_v = bridge:raw_version()
       api.nvim_command('echoerr "Incompatible version of vimwiki-server: '..raw_v..', wanted '..v..'"')
     else
-      bridge:start()
+      -- Load the specified wikis, defaulting to a wiki with no options
+      -- configured so it will use the defaults
+      local wikis = u.filter_map(
+        u.nvim_get_var_or_default('vimwiki_list', {{}}),
+        function(wiki)
+          local w = wiki.path or '~/vimwiki/'
+          if w and wiki.name then
+            w = wiki.name..':'..w
+          end
+          return w
+        end
+      )
+      bridge:start(wikis)
     end
   end
 end

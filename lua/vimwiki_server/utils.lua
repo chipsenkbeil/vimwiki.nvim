@@ -60,6 +60,16 @@ function M.nvim_has_var(name)
   return api.nvim_call_function('exists', {'g:'..name}) == 1
 end
 
+-- Short wrapper to load a spcific global variable if it exists, returning
+-- the default value if it does not
+function M.nvim_get_var_or_default(name, default)
+  if M.nvim_has_var(name) then
+    return api.nvim_get_var(name)
+  else
+    return default
+  end
+end
+
 -- Short wrapper to remove a global variable if it exists, returning its
 -- value; if it does not exist, nil is returned
 function M.nvim_remove_var(name)

@@ -178,6 +178,36 @@ function M.is_empty(array)
   return next(array or {}) == nil
 end
 
+-- Interpolates a string similar to Rust's println!(...) using {} to mark
+-- a replacement and replacing one {} at a time using the given varargs
+--
+-- Does not check for dangling {} or missing {}!
+function M.interpolate(s, ...)
+  -- For each item provided, we will replace the next instance of {} with it
+  for i = 1, select('#', ...) do
+    local item = select(i, ...)
+    s = string.gsub(s, '{}', item, 1)
+  end
+
+  return s
+end
+
+-- Compresses a string by trimming whitespace on each line and replacing
+-- newlines with a single space so that it can be sent as a single
+-- line to command line interfaces while also ensuring that lines aren't
+-- accidentally merged together
+function M.compress(s)
+  return M.concat_nonempty(
+    M.filter_map(
+      vim.split(s, '\n', true),
+      (function(line)
+        return vim.trim(line)
+      end)
+    ),
+    ' '
+  )
+end
+
 -- Converts a table to its values as a string, rather than a pointer
 -- From https://stackoverflow.com/a/6081639
 function M.serialize_table(val, name, skipnewlines, depth)

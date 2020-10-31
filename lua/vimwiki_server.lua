@@ -59,27 +59,18 @@ function M.select_an_element()
   local path = api.nvim_call_function('expand', {'%:p'})
   local reload = true
   local offset = u.cursor_offset()
-  local query = g.new_query({
+  local query = g.query([[
     {
-      name = 'page',
-      args = {{'path', path}, {'reload', reload}},
-      children = {
-        {
-          name = 'nodeAtOffset',
-          args = {{'offset', offset}},
-          children = {
-            {
-              name = 'region',
-              children = {
-                {name = 'offset'},
-                {name = 'len'},
-              }
-            }
+      page(path: "$path", reload: $reload) {
+        nodeAtOffset(offset: $offset) {
+          region {
+            offset
+            len
           }
         }
       }
     }
-  })
+  ]], {path=path, reload=reload, offset=offset})
 
   local res = bridge:send_wait(query)
 
@@ -102,32 +93,20 @@ function M.select_root_element()
   local path = api.nvim_call_function('expand', {'%:p'})
   local reload = true
   local offset = u.cursor_offset()
-  local query = g.new_query({
+  local query = g.query([[
     {
-      name = 'page',
-      args = {{'path', path}, {'reload', reload}},
-      children = {
-        {
-          name = 'nodeAtOffset',
-          args = {{'offset', offset}},
-          children = {
-            {
-              name = 'root',
-              children = {
-                {
-                  name = 'region',
-                  children = {
-                    {name = 'offset'},
-                    {name = 'len'},
-                  }
-                }
-              }
+      page(path: "$path", reload: $reload) {
+        nodeAtOffset(offset: $offset) {
+          root {
+            region {
+              offset
+              len
             }
           }
         }
       }
     }
-  })
+  ]], {path=path, reload=reload, offset=offset})
 
   local res = bridge:send_wait(query)
 
@@ -150,32 +129,20 @@ function M.select_parent_element()
   local path = api.nvim_call_function('expand', {'%:p'})
   local reload = true
   local offset = u.cursor_offset()
-  local query = g.new_query({
+  local query = g.query([[
     {
-      name = 'page',
-      args = {{'path', path}, {'reload', reload}},
-      children = {
-        {
-          name = 'nodeAtOffset',
-          args = {{'offset', offset}},
-          children = {
-            {
-              name = 'parent',
-              children = {
-                {
-                  name = 'region',
-                  children = {
-                    {name = 'offset'},
-                    {name = 'len'},
-                  }
-                }
-              }
+      page(path: "$path", reload: $reload) {
+        nodeAtOffset(offset: $offset) {
+          parent {
+            region {
+              offset
+              len
             }
           }
         }
       }
     }
-  })
+  ]], {path=path, reload=reload, offset=offset})
 
   local res = bridge:send_wait(query)
 
@@ -199,40 +166,25 @@ function M.select_inner_element()
   local path = api.nvim_call_function('expand', {'%:p'})
   local reload = true
   local offset = u.cursor_offset()
-  local query = g.new_query({
+  local query = g.query([[
     {
-      name = 'page',
-      args = {{'path', path}, {'reload', reload}},
-      children = {
-        {
-          name = 'nodeAtOffset',
-          args = {{'offset', offset}},
-          children = {
-            {name = 'isLeaf'},
-            {
-              name = 'children',
-              children = {
-                {
-                  name = 'region',
-                  children = {
-                    {name = 'offset'},
-                    {name = 'len'},
-                  }
-                }
-              }
-            },
-            {
-              name = 'region',
-              children = {
-                {name = 'offset'},
-                {name = 'len'},
-              }
+      page(path: "$path", reload: $reload) {
+        nodeAtOffset(offset: $offset) {
+          isLeaf
+          children {
+            region {
+              offset
+              len
             }
+          }
+          region {
+            offset
+            len
           }
         }
       }
     }
-  })
+  ]], {path=path, reload=reload, offset=offset})
 
   local res = bridge:send_wait(query)
 

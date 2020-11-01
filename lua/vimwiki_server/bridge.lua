@@ -136,7 +136,6 @@ function M:start(wikis)
   update_chunk = vim.schedule_wrap(update_chunk)
 
   -- Now, we spawn our vimwiki-server process
-  -- TODO: Get list of wikis from vim config for use in arguments
   local handle, pid
   handle, pid = uv.spawn("vimwiki-server", {
     args = args;

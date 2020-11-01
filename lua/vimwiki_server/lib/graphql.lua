@@ -1,6 +1,6 @@
 local vim = vim
 local api = vim.api
-local u = require 'vimwiki_server/utils'
+local u = require 'vimwiki_server/lib/utils'
 
 local M = {}
 

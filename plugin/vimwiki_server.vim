@@ -39,6 +39,13 @@ augroup vimwiki_server
 
     " Required to allow neovim to exit if a server is still running
     autocmd VimLeave * lua require 'vimwiki_server'.stop()
+
+    " Events related to buffer content so vimwiki-server can report on
+    " unsaved buffers
+    autocmd BufWinEnter *.wiki lua require 'vimwiki_server/api'.events.on_enter_buffer_window()
+    autocmd BufUnload *.wiki lua require 'vimwiki_server/api'.events.on_buffer_unload()
+    autocmd InsertLeave *.wiki lua require 'vimwiki_server/api'.events.on_insert_leave()
+    autocmd TextChanged,TextChangedI *.wiki lua require 'vimwiki_server/api'.events.on_text_changed()
 augroup END
 
 " Restore VI-compatible behavior configured by user

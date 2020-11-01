@@ -13,21 +13,21 @@ let b:__vimwiki_server_ftplugin_vimwiki = 1
 
 " Define our internal mappings for visual and operator-pending modes
 onoremap <silent><buffer> <Plug>VimwikiServerElement
-    \ :<C-U>lua require 'vimwiki_server'.select_an_element()<CR>
+    \ :<C-U>lua require 'vimwiki_server/api'.select.an_element()<CR>
 vnoremap <silent><buffer> <Plug>VimwikiServerElementV
-    \ :<C-U>lua require 'vimwiki_server'.select_an_element()<CR>
+    \ :<C-U>lua require 'vimwiki_server/api'.select.an_element()<CR>
 onoremap <silent><buffer> <Plug>VimwikiServerInnerElement
-    \ :<C-U>lua require 'vimwiki_server'.select_inner_element()<CR>
+    \ :<C-U>lua require 'vimwiki_server/api'.select.inner_element()<CR>
 vnoremap <silent><buffer> <Plug>VimwikiServerInnerElementV
-    \ :<C-U>lua require 'vimwiki_server'.select_inner_element()<CR>
+    \ :<C-U>lua require 'vimwiki_server/api'.select.inner_element()<CR>
 onoremap <silent><buffer> <Plug>VimwikiServerParentElement
-    \ :<C-U>lua require 'vimwiki_server'.select_parent_element()<CR>
+    \ :<C-U>lua require 'vimwiki_server/api'.select.parent_element()<CR>
 vnoremap <silent><buffer> <Plug>VimwikiServerParentElementV
-    \ :<C-U>lua require 'vimwiki_server'.select_parent_element()<CR>
+    \ :<C-U>lua require 'vimwiki_server/api'.select.parent_element()<CR>
 onoremap <silent><buffer> <Plug>VimwikiServerRootElement
-    \ :<C-U>lua require 'vimwiki_server'.select_root_element()<CR>
+    \ :<C-U>lua require 'vimwiki_server/api'.select.root_element()<CR>
 vnoremap <silent><buffer> <Plug>VimwikiServerRootElementV
-    \ :<C-U>lua require 'vimwiki_server'.select_root_element()<CR>
+    \ :<C-U>lua require 'vimwiki_server/api'.select.root_element()<CR>
 
 " Apply our default external mappings for visual and operator-pending modes
 omap <buffer> ae <Plug>VimwikiServerElement

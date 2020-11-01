@@ -55,6 +55,12 @@ function movement_string(line, col)
   return s
 end
 
+-- Short wrapper to get the buffer number when executing an autocommand
+function M.get_autocmd_bufnr()
+  local abuf = api.nvim_call_function('expand', {'<abuf>'})
+  return api.nvim_call_function('str2nr', {abuf})
+end
+
 -- Short wrapper to check if a specific global variable exists
 function M.nvim_has_var(name)
   return api.nvim_call_function('exists', {'g:'..name}) == 1

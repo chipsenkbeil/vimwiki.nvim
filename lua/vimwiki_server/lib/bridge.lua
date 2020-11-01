@@ -1,7 +1,7 @@
 local vim = vim
 local api = vim.api
 local uv = vim.loop
-local u = require 'vimwiki_server/utils'
+local u = require 'vimwiki_server/lib/utils'
 
 -- Our module containing functions to call
 local M = {}
@@ -9,20 +9,20 @@ M.__index = M
 
 -- Creates a new instance of our client library for the server
 function M:new()
-    local instance = {}
-    setmetatable(instance, M)
-    instance.__state = {
-      handle = nil;
-      pid = nil;
-      stdin = nil;
-      callbacks = {};
-    }
-    return instance
+  local instance = {}
+  setmetatable(instance, M)
+  instance.__state = {
+    handle = nil;
+    pid = nil;
+    stdin = nil;
+    callbacks = {};
+  }
+  return instance
 end
 
 -- Indicates whether or not the server is running
 function M:is_running()
-    return self.__state.handle and self.__state.pid and self.__state.stdin
+  return self.__state.handle and self.__state.pid and self.__state.stdin
 end
 
 -- Internal helper to clear our state

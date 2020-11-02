@@ -19,7 +19,35 @@ vimwiki goodness.
 
 ## 1. Usage
 
-TODO
+### Selection
+
+This plugin provides several bindings to support selection and operation on
+general elements within vimwiki files. Check out the [example in action](https://asciinema.org/a/369723?t=9).
+
+- `ae` works on **an element** under cursor
+    - `vae` will visually select the full element
+    - `cae` will change an element
+    - `dae` will delete an element
+    - `yae` will yank an element
+    - you can apply any other pending operator using `ae`
+- `ie` works on **inner element** of element under cursor
+    - `vie` will visually select the inner element
+    - `cie` will change the inner element
+    - `die` will delete the inner element
+    - `yie` will yank the inner element
+    - you can apply any other pending operator using `ie`
+- `pe` works on **parent element** of element under cursor
+    - `vpe` will visually select the parent element
+    - `cpe` will change the parent element
+    - `dpe` will delete the parent element
+    - `ype` will yank the parent element
+    - you can apply any other pending operator using `pe`
+- `re` works on **root element** of element under cursor
+    - `vre` will visually select the root element
+    - `cre` will change the root element
+    - `dre` will delete the root element
+    - `yre` will yank the root element
+    - you can apply any other pending operator using `re`
 
 <a name="installation"></a>
 

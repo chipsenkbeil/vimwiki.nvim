@@ -35,7 +35,7 @@ you are using!
 
 ```vim
 Plug 'vimwiki/vimwiki'
-Plug 'chipsenkbeil/vimwiki-server.nvim', { 'tag': 'v0.1.0' }
+Plug 'chipsenkbeil/vimwiki-server.nvim', { 'tag': 'v0.1.0-alpha.4' }
 ```
 
 <a name="contributing"></a>

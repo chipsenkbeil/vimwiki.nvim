@@ -2,6 +2,7 @@ local vim = vim
 local api = vim.api
 local uv = vim.loop
 local u = require 'vimwiki_server/lib/utils'
+local v = require 'vimwiki_server/lib/vars'
 
 -- Our module containing functions to call
 local M = {}
@@ -100,6 +101,18 @@ function M:start(wikis)
   -- Build our arguments for the vimwiki server, expanding environment the
   -- environment variables for any of the wikis
   local args = {"--mode", "stdin"}
+
+  local log_dir = v.vimwiki_server_log_dir()
+  if log_dir then
+    table.insert(args, '--log-dir')
+    table.insert(args, log_dir)
+  end
+
+  local log_level = v.vimwiki_server_log_level()
+  if log_level and log_level > 0 then
+    table.insert(args, '-'..string.rep('v', log_level))
+  end
+
   if wikis then
     for _, wiki in ipairs(wikis) do
       args[#args+1] = "--wiki"

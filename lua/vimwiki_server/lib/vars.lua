@@ -14,4 +14,20 @@ return {
   vimwiki_server_buffer_delay = function()
     return u.nvim_get_var_or_default('vimwiki_server#buffer#delay', 100)
   end;
+
+  -- Represents the directory to store vimwiki-server logs as files; if not
+  -- available, will return nil indicating not to store logs as files
+  vimwiki_server_log_dir = function()
+    return u.nvim_get_var_or_default('vimwiki_server#log#dir')
+  end;
+
+  -- Represents the level at which to log information from vimwiki-server
+  --
+  -- 0 = warnings/errors
+  -- 1 = info
+  -- 2 = debug
+  -- 3 = trace
+  vimwiki_server_log_level = function()
+    return u.nvim_get_var_or_default('vimwiki_server#log#level', 0)
+  end;
 }

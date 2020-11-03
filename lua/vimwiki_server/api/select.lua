@@ -28,7 +28,7 @@ function M.an_element()
     }
   ]], {path=path, reload=reload, offset=offset})
 
-  local res = bridge:send_wait(query)
+  local res = bridge:send_wait_ok(query)
 
   if res then
     local region = u.get(res, 'data.page.nodeAtOffset.region')
@@ -39,8 +39,6 @@ function M.an_element()
         vim.api.nvim_command('echoerr '..e.message)
       end
     end
-  else
-    api.nvim_command('echoerr "Max timeout reached waiting for result"')
   end
 end
 
@@ -67,7 +65,7 @@ function M.root_element()
     }
   ]], {path=path, reload=reload, offset=offset})
 
-  local res = bridge:send_wait(query)
+  local res = bridge:send_wait_ok(query)
 
   if res then
     local region = u.get(res, 'data.page.nodeAtOffset.root.region')
@@ -78,8 +76,6 @@ function M.root_element()
         vim.api.nvim_command('echoerr '..e.message)
       end
     end
-  else
-    api.nvim_command('echoerr "Max timeout reached waiting for result"')
   end
 end
 
@@ -106,7 +102,7 @@ function M.parent_element()
     }
   ]], {path=path, reload=reload, offset=offset})
 
-  local res = bridge:send_wait(query)
+  local res = bridge:send_wait_ok(query)
 
   if res then
     local region = u.get(res, 'data.page.nodeAtOffset.parent.region')
@@ -117,8 +113,6 @@ function M.parent_element()
         vim.api.nvim_command('echoerr '..e.message)
       end
     end
-  else
-    api.nvim_command('echoerr "Max timeout reached waiting for result"')
   end
 end
 
@@ -151,7 +145,7 @@ function M.inner_element()
     }
   ]], {path=path, reload=reload, offset=offset})
 
-  local res = bridge:send_wait(query)
+  local res = bridge:send_wait_ok(query)
 
   if res then
     local node = u.get(res, 'data.page.nodeAtOffset')
@@ -185,8 +179,6 @@ function M.inner_element()
         vim.api.nvim_command('echoerr '..e.message)
       end
     end
-  else
-    api.nvim_command('echoerr "Max timeout reached waiting for result"')
   end
 end
 

@@ -224,6 +224,26 @@ function M.compress(s)
   )
 end
 
+-- Mirror of neovim 0.5's vim.api.nvim_exec() using a temporary file and
+-- sourcing it to perform the evaluation
+function M.nvim_exec(code, ret)
+  local lines = vim.split(code, '\n', true)
+
+  local tmp_path = api.nvim_call_function('tempname', {})
+  api.nvim_call_function('writefile', {lines, tmp_path, 'bS'})
+
+  local result = nil
+  if ret then
+    result = api.nvim_command_output('source '..tmp_path)
+  else
+    api.nvim_command('source '..tmp_path)
+  end
+
+  api.nvim_call_function('delete', {tmp_path})
+
+  return result
+end
+
 -- Converts a table to its values as a string, rather than a pointer
 -- From https://stackoverflow.com/a/6081639
 function M.serialize_table(val, name, skipnewlines, depth)

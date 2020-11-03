@@ -30,4 +30,14 @@ return {
   vimwiki_server_log_level = function()
     return u.nvim_get_var_or_default('vimwiki_server#log#level', 0)
   end;
+
+  -- Represents the configuration for executing code for the specified language
+  vimwiki_server_code = function(language)
+    return u.nvim_get_var_or_default('vimwiki_server#code#'..language)
+  end;
+
+  -- Represents the configuration for executing code with no explicit language
+  vimwiki_server_code_default = function()
+    return u.nvim_get_var_or_default('vimwiki_server#code#default')
+  end
 }

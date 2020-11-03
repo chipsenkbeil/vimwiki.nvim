@@ -11,6 +11,10 @@ if exists('b:__vimwiki_server_ftplugin_vimwiki')
 endif
 let b:__vimwiki_server_ftplugin_vimwiki = 1
 
+nnoremap <silent><buffer> <Plug>VimwikiServerExecute
+    \ :lua require 'vimwiki_server/api'.code.execute_under_cursor()<CR>
+nmap <buffer> gx <Plug>VimwikiServerExecute
+
 " Define our internal mappings for visual and operator-pending modes
 onoremap <silent><buffer> <Plug>VimwikiServerElement
     \ :<C-U>lua require 'vimwiki_server/api'.select.an_element()<CR>

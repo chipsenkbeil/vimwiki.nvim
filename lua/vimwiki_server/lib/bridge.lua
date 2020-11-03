@@ -256,6 +256,17 @@ function M:send_wait(msg, timeout, interval)
   return result
 end
 
+-- Send a message to our server, wait synchronously for the result, and
+-- report an error if not okay
+function M:send_wait_ok(msg, timeout, interval)
+  local result = self:send_wait(msg, timeout, interval)
+  if result == nil then
+    api.nvim_err_writeln('Max timeout ('..tostring(timeout)..') reached waiting for result')
+  end
+
+  return result
+end
+
 -- Primary event handler for our server, routing received events to the
 -- corresponding callbacks
 function M:__handler(msg)

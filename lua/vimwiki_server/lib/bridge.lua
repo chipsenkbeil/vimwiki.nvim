@@ -92,7 +92,7 @@ function M:raw_version()
 end
 
 -- Starts an instance of vimwiki-server if not already running
-function M:start(wikis)
+function M:start()
   -- If server is already running, this function does nothing
   if self:is_running() then
       return
@@ -113,6 +113,7 @@ function M:start(wikis)
     table.insert(args, '-'..string.rep('v', log_level))
   end
 
+  local wikis = v.vimwiki_server_wikis()
   if wikis then
     for _, wiki in ipairs(wikis) do
       args[#args+1] = "--wiki"

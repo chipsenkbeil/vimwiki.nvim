@@ -9,9 +9,8 @@ local a = require 'vimwiki_server/api'
 -- Primary entrypoint to start main vimwiki server instance
 function M.start()
   if not bridge:is_running() then
-    if a.version.is_valid(bridge) then
-      local wikis = a.vars.wikis()
-      bridge:start(wikis)
+    if a.version.is_valid() then
+      bridge:start()
     end
   end
 end

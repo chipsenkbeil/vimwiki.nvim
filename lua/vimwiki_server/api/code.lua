@@ -43,7 +43,7 @@ function M.execute_under_cursor()
     if language == 'vim' and lines then
       -- TODO: This cannot capture echos until neovim 0.5
       local code = table.concat(lines or {}, '\n')
-      local result = u.nvim_exec(code)
+      result = u.nvim_exec(code, true)
 
     -- Otherwise, if we know the language, try to evaluate it
     elseif language ~= nil and lines then

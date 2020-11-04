@@ -5,16 +5,17 @@
 "        neovim using the vimwiki server.
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-if exists('g:private_loaded_vimwiki_server')
+if exists('g:vimwiki_server#internal#loaded')
     finish
 endif
-let g:private_loaded_vimwiki_server = 1
+let g:vimwiki_server#internal#loaded = 1
 
 " Ensure that all VimL uses standard option set to maintain consistency
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" CHECK VERSION
 
 " Require neovim with lua support, floating windows, and more
 if !has('nvim-0.4.0')
@@ -28,8 +29,8 @@ if !has('nvim-0.4.0')
     finish
 endif
 
-" Enable other plugins to play well with this one
-let g:loaded_vimwiki_server = 1
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" DEFINE EVENT HANDLING
 
 augroup vimwiki_server
     autocmd!
@@ -47,6 +48,17 @@ augroup vimwiki_server
     autocmd InsertLeave *.wiki lua require 'vimwiki_server/api'.events.on_insert_leave()
     autocmd TextChanged,TextChangedI *.wiki lua require 'vimwiki_server/api'.events.on_text_changed()
 augroup END
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" DEFINE COMMANDS
+
+command! -nargs=0 VimwikiServerEvalCode
+    \ :lua require 'vimwiki_server/api'.code.execute_under_cursor()<CR>
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" Enable other plugins to play well with this one
+let g:vimwiki_server#loaded = 1
 
 " Restore VI-compatible behavior configured by user
 let &cpoptions = s:save_cpo

@@ -15,7 +15,35 @@ function M.cursor_offset()
   return offset_to_line + offset_to_column
 end
 
--- Selects the byte range starting at offset with the specified byte length.
+-- Changes the text in the current buffer starting at the specified offset
+-- through the byte length.
+--
+-- Assumes that the offset is from the server, which is index 0.
+function M.change_in_buffer(offset, len, text)
+  -- Adjust our offset and len to start at index 1
+  local offset = offset + 1
+  local len = len - 1
+
+  -- Calculate the starting and ending line/column positions for selection
+  local lstart = api.nvim_call_function('byte2line', {offset})
+  local cstart = offset - api.nvim_call_function('line2byte', {lstart}) + 1
+  local lend = api.nvim_call_function('byte2line', {offset + len})
+  local cend = offset + len - api.nvim_call_function('line2byte', {lend}) + 1
+
+  -- Insert our text into the unnamed register so we can paste it later
+  api.nvim_call_function('setreg', {'"', text})
+
+  -- Build the commands to apply in normal mode
+  --
+  -- Enter visual mode, jump to the beginning of our selection, then jump the
+  -- cursor to where we were before, move to the end of the selection, and
+  -- finally paste from our unnamed register
+  cmd = movement_string(lend, cend)..'v'..movement_string(lstart, cstart)..'""p'
+  api.nvim_command('normal! '..cmd)
+end
+
+-- Visually selects the byte range starting at offset with the specified
+-- byte length.
 --
 -- Builds the key sequence to select in vim from the specified offset to some
 -- end using the given length. Assumes that the offset provided is from our
@@ -37,6 +65,25 @@ function M.select_in_buffer(offset, len)
   -- cursor to where we were before, and move to the end of the selection
   cmd = movement_string(lend, cend)..'v'..movement_string(lstart, cstart)
   api.nvim_command('normal! '..cmd)
+end
+
+-- Returns a list of line numbers that are contained within the starting
+-- byte offset through the specified byte length.
+--
+-- Assumes that the offset provided is from our server, which is index 0.
+function M.get_line_numbers(offset, len)
+  -- Adjust our offset and len to start at index 1
+  local offset = offset + 1
+  local len = len - 1
+
+  local lstart = api.nvim_call_function('byte2line', {offset})
+  local lend = api.nvim_call_function('byte2line', {offset + len})
+
+  local lines = {}
+  for i=lstart, lend do
+    table.insert(lines, i)
+  end
+  return lines
 end
 
 -- Returns a string representing movement in vim to the given line and column
@@ -208,6 +255,27 @@ function M.interpolate(s, ...)
   return s
 end
 
+-- Interpolates variables provided in the form of {name="value", name_two=3}
+-- into a string using $name and $name_two
+--
+-- Converts values from variables table into their tostring form. If value is
+-- nil, the key/value pair is removed.
+--
+-- Names only allow alphanumeric characters and underscores
+function M.interpolate_vars(s, variables)
+  local clean_variables = {}
+
+  -- Iterate through variables table, removing nil values and tostring-ing
+  -- all of the other values so they can be provided to gsub
+  for k, v in pairs(variables) do
+    if v ~= nil then
+      clean_variables[k] = tostring(v)
+    end
+  end
+
+  return string.gsub(s, '%$([%w_]+)', clean_variables)
+end
+
 -- Compresses a string by trimming whitespace on each line and replacing
 -- newlines with a single space so that it can be sent as a single
 -- line to command line interfaces while also ensuring that lines aren't
@@ -239,9 +307,22 @@ function M.nvim_exec(code, ret)
     api.nvim_command('source '..tmp_path)
   end
 
+  -- api.nvim_command('redir! END')
   api.nvim_call_function('delete', {tmp_path})
 
   return result
+end
+
+-- Returns true if provided string starts with other string
+function M.starts_with(s, start)
+  return s ~= nil and start ~= nil and string.sub(s, 1, string.len(start)) == start
+end
+
+-- Escapes newline characters (and removes null byte characters)
+function M.escape_newline(s)
+  s = string.gsub(s, '\0', '')
+  s = string.gsub(s, '\n', '\\n')
+  return s
 end
 
 -- Converts a table to its values as a string, rather than a pointer
@@ -252,7 +333,7 @@ function M.serialize_table(val, name, skipnewlines, depth)
 
     local tmp = string.rep(" ", depth)
 
-    if name then tmp = tmp .. name .. " = " end
+    if name then tmp = tmp .. tostring(name) .. " = " end
 
     if type(val) == "table" then
         tmp = tmp .. "{" .. (not skipnewlines and "\n" or "")

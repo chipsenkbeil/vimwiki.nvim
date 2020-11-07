@@ -129,7 +129,12 @@ function do_eval(language, lines)
 end
 
 function inject_result_into_buffer(result, code_region, comment)
-  local text = '%%+RESULT+\n'..vim.trim(tostring(result))..'\n+%%'
+  -- If our result is made up of more than one line post-trim, we want to
+  -- show it on its own lines between the comment syntax, otherwise we want
+  -- to show it inline with a single space delimiter
+  local result_str = vim.trim(tostring(result))
+  local sep = (string.find(result_str, '\n', 1, true) ~= nil) and '\n' or ' '
+  local text = '%%+RESULT+'..sep..result_str..sep..'+%%'
 
   -- Check if we have an element below our code that starts with a comment
   -- containing our result. If we do, then we want to replace that comment with

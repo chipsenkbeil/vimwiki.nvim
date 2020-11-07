@@ -325,6 +325,11 @@ function M.escape_newline(s)
   return s
 end
 
+-- Wrapper to provide clearer len check
+function M.len(t)
+  return table.getn(t or {})
+end
+
 -- Converts a table to its values as a string, rather than a pointer
 -- From https://stackoverflow.com/a/6081639
 function M.serialize_table(val, name, skipnewlines, depth)
